@@ -8,3 +8,10 @@ pip install -r requirements.txt
 ```bash
 uvicorn main:app --port 8000 --reload
 ```
+
+# Before pull request
+- Run test script to make sure the update does not break preexisitin code
+```bash
+# In the server directory
+python test.py
+```
