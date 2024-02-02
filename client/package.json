@@ -10,8 +10,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@use-gesture/react": "^10.3.0",
+    "firebase": "^10.7.2",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.21.3",
+    "styled-components": "^6.1.8",
+    "uuidv4": "^6.2.13"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",
