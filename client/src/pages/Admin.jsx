@@ -281,7 +281,7 @@ const Admin = () => {
         setInput={setNodeId}
         handleAdd={handleAdd}
         header={"Add Node"}
-        content={"Enter node id"}
+        content={"Enter node id or leave blank to generate random id"}
       />
       <InputModal
         open={openFloorModal}
