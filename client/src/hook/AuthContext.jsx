@@ -5,7 +5,6 @@ export const AuthContext = createContext({
   auth: null,
   user: null,
   setUser: () => {},
-  logout: () => {},
   loading: false,
   setLoading: () => {}
 })
