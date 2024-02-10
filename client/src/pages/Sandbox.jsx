@@ -26,6 +26,8 @@ const Sandbox = () => {
   const [nodes, setNodes] = useState({})
   const [lines, setLines] = useState([])
 
+  const [paths, setPaths] = useState()
+
   const getNodes = async () => {
     if(!floorId?.length) {
       setNodes({})
@@ -46,8 +48,46 @@ const Sandbox = () => {
   }, [floorId])
 
   useEffect(() => {
+    if(!paths)return
     const set = new Set()
     const connections = []
+    for(const key in nodes){
+      if(key in paths)continue
+      let distNode = [Number.MAX_SAFE_INTEGER, null]
+      for(const exit in paths){
+        if(paths[exit].distances[key] && paths[exit].distances[key] < distNode[0]){
+          distNode = [paths[exit].distances[key], paths[exit].prev[key]]
+        }
+      }
+
+      if(distNode[0] === Number.MAX_SAFE_INTEGER) continue
+      const nodeStart = nodes[key].ui
+      const nodeEnd = nodes[distNode[1]].ui
+      // Create a line svg to display each node connection
+      connections.push(<line
+        key={key+"-"+distNode[1]}
+        x1={nodeStart.x} 
+        y1={nodeStart.y} 
+        x2={nodeEnd.x} 
+        y2={nodeEnd.y} 
+        stroke="black"
+      />)
+      connections.push(
+        <polygon
+          key={key+"-"+distNode[1]+"-end"}
+          id={key}
+          points={(nodeStart.x)+ "," + nodeStart.y + " " + (nodeStart.x - 10) + "," + (nodeStart.y - 10) + " " + (nodeStart.x - 10) + "," + (nodeStart.y)}
+          fill='black'
+          style={{
+            transformOrigin: (nodeStart.x) + "px " + (nodeStart.y) + "px",
+            transform: "rotate(" +( Math.atan2((nodeStart.y - nodeEnd.y), (nodeStart.x - nodeEnd.x)) * 180 / Math.PI + 45 ) + "deg)" + "\n" + "translate(-8px, 20px)"
+          }}
+        />
+      )
+      set.add(key+", "+distNode[1])
+      set.add(distNode[1]+", "+key)
+    }
+
     for(const key in nodes){
       for(const connection of nodes[key].connections){
         if(!set.has(key+ ", " +connection)){
@@ -69,7 +109,7 @@ const Sandbox = () => {
       }
     }
     setLines(connections)
-  }, [nodes])
+  }, [paths])
 
   const alarmNode = (nodeId) => {
     const tempNodes = JSON.parse(JSON.stringify(nodes))
@@ -160,6 +200,67 @@ const Sandbox = () => {
     setNodes(tempNodes)
   }
 
+  useEffect(() => {
+    if(nodes){
+      function dijkstra(graph, startNode) {
+        const distances = {}; // Store distances from the start node
+        const prev = {}; // Store the previous node in the optimal path
+        const visited = new Set(); // Track visited nodes
+        for(const node in nodes){
+          if(nodes[node].isDisabled)visited.add(node)
+        }
+        const queue = []; // Priority queue of nodes to visit
+      
+        // Initialize distances and queue
+        for (let node in graph) {
+          distances[node] = Infinity;
+          queue.push(node);
+          prev[node] = null;
+        }
+        distances[startNode] = 0;
+      
+        while (queue.length !== 0) {
+          // Sort queue by distance (simple priority queue)
+          queue.sort((a, b) => distances[a] - distances[b]);
+          const currentNode = queue.shift(); // Node with the shortest distance
+          visited.add(currentNode);
+      
+          for (let neighbor of graph[currentNode].connections) {
+            if (visited.has(neighbor)) continue; // Skip visited nodes
+      
+            // Calculate new distance
+            const newDistance = distances[currentNode] + (
+              (
+                graph[currentNode].ui.x - graph[neighbor].ui.x
+              )**2 + (
+                graph[currentNode].ui.y - graph[neighbor].ui.y
+              )**2
+            )**(1/2);
+            if (newDistance < distances[neighbor]) {
+              distances[neighbor] = newDistance; // Update distance
+              prev[neighbor] = currentNode; // Update path
+            }
+          }
+        }
+      
+        return { distances, prev };
+      }
+
+      const tempPaths = {}
+  
+      // Example usage
+      for(const node in nodes){
+        if(nodes[node].isExit && !nodes[node].isDisabled){
+          const result = dijkstra(nodes, node);
+          tempPaths[node] = {
+            ...result
+          }
+        }
+      }
+      setPaths(tempPaths)
+    }
+  }, [nodes])
+
   return (
     <Container $svgPosition={svgPosition} $svgScale={svgScale} $origin={origin}>
       <FloorDropDown setFloorId={setFloorId} floorId={floorId}/>
@@ -206,6 +307,10 @@ const Container = styled.div`
       width: 100%;
       height: 100%;
       touch-action: none;
+      /* polygon{
+        transform: translate(10px, 10px)
+        scale(${props => props.$svgScale});
+      } */
       circle, line{
         transform-origin: 50% 50%;
         transform: 
