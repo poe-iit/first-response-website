@@ -2,7 +2,7 @@ import {useContext, useEffect, useState }from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom';
 import GitHubIcon from '@mui/icons-material/GitHub';
-import AppleIcon from '@mui/icons-material/Apple';
+import FacebookIcon from '@mui/icons-material/Facebook';
 import GoogleIcon from "@mui/icons-material/Google"
 import { AuthContext } from '../hook/AuthContext';
 import { createUserWithEmailAndPassword, GithubAuthProvider, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
@@ -134,9 +134,9 @@ const SignUp = () => {
         <div className='external-signup'>
           <button className='github' onClick={() => handleSignUp("github")}><GitHubIcon />Sign Up with GitHub</button>
           <button className='google' onClick={() => handleSignUp("google")}><GoogleIcon />Sign Up with Google</button>
-          <button className='apple'><AppleIcon />Sign Up with Apple</button>
+          <button className='facebook' onClick={() => handleSignUp("facebook")}><FacebookIcon />Sign Up with Facebook</button>
         </div>
-        <p    className='login-redirect'>Already have an account? <Link to='/login'>Log In</Link></p>
+        <p className='login-redirect'>Already have an account? <Link to='/login'>Log In</Link></p>
       </div>
     </Container>
   )
@@ -145,13 +145,13 @@ const SignUp = () => {
 export default SignUp
 
 const Container = styled.div`
-  background-color: var(--md-sys-color-background);
+  padding: 1em 0;
   min-height: 100vh;
   display: flex;
-  flex-direction: row-reverse;
+  justify-content: center;
   .content-container {
     width: 500px;
-    margin: 0 auto;
+    padding: 0 70px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -170,7 +170,6 @@ const Container = styled.div`
       flex-direction: column;
       gap: 1em;
       width: 100%;
-      max-width: 360px;
       li{
         p{
           font-size: 14px;
@@ -192,7 +191,6 @@ const Container = styled.div`
     }
     button{
       width: 100%;
-      max-width: 360px;
       border-radius: 100px;
       background-color: var(--md-sys-color-primary);
       color: var(--md-sys-color-on-primary);
@@ -211,14 +209,12 @@ const Container = styled.div`
     .divider{
       height: 0;
       width: 100%;
-      max-width: 360px;
       border-bottom: 1px solid var(--md-sys-color-outline-variant);
     }
     .external-signup{
       display: flex;
       flex-direction: column;
       width: 100%;
-      max-width: 360px;
       gap: 0.7em;
       button{
         & > svg{
@@ -243,6 +239,11 @@ const Container = styled.div`
           text-decoration: underline;
         }
       }
+    }
+  }
+  @media screen and (max-width: 700px) {
+    .content-container{
+      padding: 0 20px;
     }
   }
 `
