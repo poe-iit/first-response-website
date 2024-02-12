@@ -75,9 +75,6 @@ const Login = () => {
         })
         break
     }
-    if(errorCode === "auth/account-exists-with-different-credential"){
-
-    }
   }
 
   const handleLogin = async (state) => {
@@ -117,6 +114,7 @@ const Login = () => {
 
       if(provider){
         setLoading(true)
+        localStorage.setItem("login-method", state)
         signInWithRedirect(auth, provider)
         // .then((result) => {
         //   // This gives you a GitHub Access Token. You can use it to access the GitHub API.
@@ -203,10 +201,18 @@ const Login = () => {
 
   useEffect(() => {
     if(!auth)return
-    getRedirectResult(auth)
-    .catch((error) => {
-      handleError(error.code)
-    })
+    if(localStorage["login-method"]){
+      delete localStorage["login-method"]
+      getRedirectResult(auth)
+      .then((result) => {
+        setUser(result.user)
+        setLoading(false)
+      })
+      .catch((error) => {
+        handleError(error.code)
+        setLoading(false)
+      })
+    }
   }, [auth])
 
   // Add errors, make apple work
