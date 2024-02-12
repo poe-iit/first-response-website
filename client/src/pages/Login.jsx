@@ -2,13 +2,15 @@ import { useContext, useEffect, useState } from "react"
 import styled from 'styled-components'
 import { Link, useNavigate } from 'react-router-dom';
 import GitHubIcon from '@mui/icons-material/GitHub';
-import AppleIcon from '@mui/icons-material/Apple';
+import FacebookIcon from '@mui/icons-material/Facebook';
 import GoogleIcon from "@mui/icons-material/Google"
 import { AuthContext } from "../hook/AuthContext";
-import { GithubAuthProvider, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import { GithubAuthProvider, GoogleAuthProvider, FacebookAuthProvider, signInWithEmailAndPassword, signInWithRedirect, getRedirectResult } from 'firebase/auth';
+import { doc, setDoc, getDoc } from 'firebase/firestore'
+import ErrorBlob from "../components/ErrorBlob";
 
 const Login = () => {
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState(localStorage.getItem("login-email") || '')
   const [password, setPassword] = useState('')
   const navigate = useNavigate()
 
@@ -62,6 +64,10 @@ const Login = () => {
   }
 
   useEffect(() => {
+    if(user)navigate("/")
+  }, [])
+
+  useEffect(() => {
     const handleEnter = (e) => {
       if(e.key === "Enter" && auth){
         setLoading(true)
@@ -105,7 +111,7 @@ const Login = () => {
         <div className='external-login'>
           <button className='github' onClick={() => handleLogin("github")}><GitHubIcon />Log In with GitHub</button>
           <button className='google' onClick={() => handleLogin("google")}><GoogleIcon />Log In with Google</button>
-          <button className='apple'><AppleIcon />Log In with Apple</button>
+          <button className='facebook' onClick={() => handleLogin("facebook")}><FacebookIcon />Log In with Facebook</button>
         </div>
         <p className='signup-redirect'>Don't have an account? <Link to='/signup'>Sign Up</Link></p>
       </div>
@@ -116,13 +122,13 @@ const Login = () => {
 export default Login
 
 const Container = styled.div`
-  background-color: var(--md-sys-color-background);
+  padding: 1em 0;
   min-height: 100vh;
   display: flex;
-  flex-direction: row-reverse;
+  justify-content: center;
   .content-container {
     width: 500px;
-    margin: 0 auto;
+    padding: 0 70px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -141,7 +147,6 @@ const Container = styled.div`
       flex-direction: column;
       gap: 1em;
       width: 100%;
-      max-width: 360px;
       li{
         p{
           font-size: 14px;
@@ -163,7 +168,6 @@ const Container = styled.div`
     }
     button{
       width: 100%;
-      max-width: 360px;
       border-radius: 100px;
       background-color: var(--md-sys-color-primary);
       color: var(--md-sys-color-on-primary);
@@ -182,14 +186,12 @@ const Container = styled.div`
     .divider{
       height: 0;
       width: 100%;
-      max-width: 360px;
       border-bottom: 1px solid var(--md-sys-color-outline-variant);
     }
     .external-login{
       display: flex;
       flex-direction: column;
       width: 100%;
-      max-width: 360px;
       gap: 0.7em;
       button{
         & > svg{
@@ -214,6 +216,11 @@ const Container = styled.div`
           text-decoration: underline;
         }
       }
+    }
+  }
+  @media screen and (max-width: 700px) {
+    .content-container{
+      padding: 0 20px;
     }
   }
 `
