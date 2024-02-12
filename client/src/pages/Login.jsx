@@ -14,13 +14,83 @@ const Login = () => {
   const [password, setPassword] = useState('')
   const navigate = useNavigate()
 
-  const { setUser, setLoading, auth, user } = useContext(AuthContext)
+  const [errorBlob, setErrorBlob] = useState()
+
+  const { setUser, setLoading, setUserData, userData, auth, user, db } = useContext(AuthContext)
+
+  const handleError = (errorCode) => {
+    switch(errorCode){
+      case "auth/account-exists-with-different-credential":
+        setErrorBlob({
+          title: "Wrong Credentials",
+          message: "Your account was created with a different login method. Please use that login method to sign in."
+        })
+        break
+      case "auth/invalid-email":
+        setErrorBlob({
+          title: "Invalid Email",
+          message: "Please enter a valid email address."
+        })
+        break
+      case "auth/user-disabled":
+        setErrorBlob({
+          title: "Account Disabled",
+          message: "Your account has been disabled. Please contact support."
+        })
+        break
+      case "auth/user-not-found":
+        setErrorBlob({
+          title: "Account Not Found",
+          message: "Your account was not found. Please sign up."
+        })
+        break
+      case "auth/too-many-requests":
+        setErrorBlob({
+          title: "Too Many Requests",
+          message: "Too many failed login attempts. Please try again later."
+        })
+        break
+      case "auth/popup-closed-by-user":
+        setErrorBlob({
+          title: "Popup Closed",
+          message: "The popup has been closed. Please try again."
+        })
+        break
+      case "auth/popup-blocked":
+        setErrorBlob({
+          title: "Popup Blocked",
+          message: "The popup has been blocked. Please unblock it and try again."
+        })
+        break
+      case "auth/network-request-failed":
+        setErrorBlob({
+          title: "Network Error",
+          message: "Network request failed. Please try again."
+        })
+        break
+      default:
+        setErrorBlob({
+          title: "Invalid Credentials",
+          message: "Incorrect email address and / or password. If your account was created with a different login method, please use that method to sign in. You can then link your account through the account settings."
+        })
+        break
+    }
+    if(errorCode === "auth/account-exists-with-different-credential"){
+
+    }
+  }
 
   const handleLogin = async (state) => {
     if(state === "normal"){
       console.log(auth, "Working", email, password)
       if(!auth)return
       setLoading(true)
+      const regex = new RegExp("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+      if(!regex.test(email) || password.length === 0){
+        handleError("Invalid email")
+        setLoading(false)
+        return
+      }
       await signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         console.log(userCredential)
@@ -28,7 +98,10 @@ const Login = () => {
         setLoading(false)
       })
       .catch((error) => {
+        console.error("Error Code:", error.code);
+        console.error("Error Message:", error.message);
         console.log(error)
+        handleError(error.code)
         setLoading(false)
       })
       setLoading(false)
@@ -38,26 +111,29 @@ const Login = () => {
         provider = new GithubAuthProvider();
       }else if(state === "google"){
         provider = new GoogleAuthProvider();
+      }else if(state === "facebook"){
+        provider = new FacebookAuthProvider();
       }
 
       if(provider){
         setLoading(true)
-        signInWithPopup(auth, provider)
-        .then((result) => {
-          // This gives you a GitHub Access Token. You can use it to access the GitHub API.
-          const credential = GithubAuthProvider.credentialFromResult(result);
-          const token = credential.accessToken;
-          console.log(result, credential)
+        signInWithRedirect(auth, provider)
+        // .then((result) => {
+        //   // This gives you a GitHub Access Token. You can use it to access the GitHub API.
+        //   // const credential = GithubAuthProvider.credentialFromResult(result);
+        //   // const token = credential.accessToken;
+        //   // console.log(result, credential)
       
-          // The signed-in user info.
-          setUser(result.user);
-          setLoading(false)
-        }).catch((error) => {
-          // The AuthCredential type that was used.
-          const credential = GithubAuthProvider.credentialFromError(error);
-          console.log(error, credential)
-          setLoading(false)
-        });
+        //   // The signed-in user info.
+        //   setUser(result.user);
+        //   setLoading(false)
+        // }).catch((error) => {
+        //   // The AuthCredential type that was used.
+        //   // const credential = GithubAuthProvider.credentialFromError(error);
+        //   // console.error(error, credential)
+        //   handleError(error.code)
+        //   setLoading(false)
+        // });
         setLoading(false)
       }
     }
@@ -71,6 +147,12 @@ const Login = () => {
     const handleEnter = (e) => {
       if(e.key === "Enter" && auth){
         setLoading(true)
+        const regex = new RegExp("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+        if(!regex.test(email) || password.length === 0){
+          handleError("Invalid email")
+          setLoading(false)
+          return
+        }
         signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
           console.log(userCredential)
@@ -78,7 +160,10 @@ const Login = () => {
           setLoading(false)
         })
         .catch((error) => {
-          console.log(error)
+          console.error("Error Code:", error.code);
+          console.error("Error Message:", error.message);
+          console.error(error)
+          handleError(error.code)
           setLoading(false)
         })
         setLoading(false)
@@ -89,21 +174,61 @@ const Login = () => {
   }, [auth, email, password])
 
   useEffect(() => {
-    if(user)navigate("/")
+    localStorage.setItem("login-email", email)
+  }, [email])
+
+  useEffect(() => {
+    if(user){
+      (async () => {
+        const userRef = doc(db, "users", user.uid)
+        getDoc(userRef)
+        .then(async docSnap => {
+          if(!docSnap.exists()){
+            await setDoc(doc(db, "users", user.uid), {
+              email: user.email,
+              name: user.displayName,
+              photoURL: user.photoURL,
+              newUser: true
+            })
+            setUserData({
+              ...userData,
+              newUser: true
+            })
+          }
+      })
+      })()
+      navigate("/")
+    }
   }, [user])
 
+  useEffect(() => {
+    if(!auth)return
+    getRedirectResult(auth)
+    .catch((error) => {
+      handleError(error.code)
+    })
+  }, [auth])
+
+  // Add errors, make apple work
   return (
     <Container>
       <div className='content-container'>
-        <h3>Login</h3>
+        <h3>Log In</h3>
+        {errorBlob?.title && <ErrorBlob {...errorBlob} />}
         <ul>
           <li>
             <p>Email/Username</p>
-            <input type='text' placeholder='Type here' value={email} onInput={(e) => setEmail(e.target.value)} />
+            <input type='text' placeholder='Type here' value={email} onInput={(e) => {
+              if(errorBlob)setErrorBlob()
+              setEmail(e.target.value)}
+            } />
           </li>
           <li>
             <p>Password</p>
-            <input type='password' placeholder='Type here' value={password} onInput={(e) => setPassword(e.target.value)} />
+            <input type='password' placeholder='Type here' value={password} onInput={(e) => {
+              if(errorBlob)setErrorBlob()
+              setPassword(e.target.value)}
+            } />
           </li>
         </ul>
         <button onClick={() => handleLogin("normal")}>Log In</button>
