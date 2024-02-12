@@ -5,8 +5,9 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import GoogleIcon from "@mui/icons-material/Google"
 import { AuthContext } from '../hook/AuthContext';
-import { createUserWithEmailAndPassword, GithubAuthProvider, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { createUserWithEmailAndPassword, GithubAuthProvider, GoogleAuthProvider, FacebookAuthProvider, signInWithRedirect, getRedirectResult } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
+import { doc, setDoc } from 'firebase/firestore'
 
 const SignUp = () => {
   const [email, setEmail] = useState('')
@@ -14,7 +15,7 @@ const SignUp = () => {
   const [confirmPassword, setConfirmPassword] = useState('')
   const navigate = useNavigate()
 
-  const { setLoading, setUser, auth, user } = useContext(AuthContext)
+  const { setLoading, setUser, setUserData, auth, db, user } = useContext(AuthContext)
 
   const register = async (email, password) => {
     if(!auth)return
@@ -51,31 +52,37 @@ const SignUp = () => {
         provider = new GithubAuthProvider();
       }else if(state === "google"){
         provider = new GoogleAuthProvider();
+      }else if(state === "facebook"){
+        provider = new FacebookAuthProvider();
       }
 
       if(provider){
         setLoading(true)
-        signInWithPopup(auth, provider)
-        .then((result) => {
-          // This gives you a GitHub Access Token. You can use it to access the GitHub API.
-          const credential = GithubAuthProvider.credentialFromResult(result);
-          const token = credential.accessToken;
-          console.log(result, credential)
+        signInWithRedirect(auth, provider);
+        // .then((result) => {
+        //   // This gives you a GitHub Access Token. You can use it to access the GitHub API.
+        //   // const credential = GithubAuthProvider.credentialFromResult(result);
+        //   // const token = credential.accessToken;
+        //   // console.log(result, credential)
       
-          // The signed-in user info.
-          setUser(result.user);
-          setLoading(false)
-        }).catch((error) => {
-          // The AuthCredential type that was used.
-          const credential = GithubAuthProvider.credentialFromError(error);
-          console.log(error, credential)
-          setLoading(false)
-        });
+        //   // The signed-in user info.
+        //   setUser(result.user);
+        //   setLoading(false)
+        // }).catch((error) => {
+        //   // The AuthCredential type that was used.
+        //   // const credential = GithubAuthProvider.credentialFromError(error);
+        //   // console.log(error, credential)
+        //   setLoading(false)
+        // });
         setLoading(false)
       }
     }
     
   }
+
+  useEffect(() => {
+    if(user)navigate("/")
+  }, [])
 
   useEffect(() => {
     const handleEnter = (e) => {
@@ -108,9 +115,30 @@ const SignUp = () => {
 
   useEffect(() => {
     if(user){
+      (async () => {
+        await setDoc(doc(db, "users", user.uid), {
+          email: user.email,
+          name: user.displayName,
+          photoURL: user.photoURL,
+          newUser: false
+        })
+        setUserData(
+          {
+            email: user.email,
+            name: user.displayName,
+            photoURL: user.photoURL,
+            newUser: false
+          }
+        )
+      })()
       navigate("/")
     }
   }, [user])
+
+  useEffect(() => {
+    if(!auth)return
+    getRedirectResult(auth)
+  }, [])
   return (
     <Container>
       <div className='content-container'>
