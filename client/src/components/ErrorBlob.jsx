@@ -20,7 +20,7 @@ export default ErrorBlob
 const Container = styled.div`
   background-color: var(--md-sys-color-error-container);
   width: 100%;
-  padding: 0.5em 1em 1em 1em;
+  padding: 0.5em 0.85em 1em 0.85em;
   font-size: 0.95em;
   border-radius: 0.7em;
   display: flex;
