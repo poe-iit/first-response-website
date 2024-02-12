@@ -8,11 +8,13 @@ import { AuthContext } from '../hook/AuthContext';
 import { createUserWithEmailAndPassword, GithubAuthProvider, GoogleAuthProvider, FacebookAuthProvider, signInWithRedirect, getRedirectResult } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { doc, setDoc } from 'firebase/firestore'
+import ErrorBlob from "../components/ErrorBlob";
 
 const SignUp = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [error, setError] = useState(false)
   const navigate = useNavigate()
 
   const { setLoading, setUser, setUserData, auth, db, user } = useContext(AuthContext)
@@ -28,21 +30,99 @@ const SignUp = () => {
     })
     .catch((error) => {
       console.log(error)
+      handleError(error.code)
       setLoading(false)
     })
     setLoading(false)
   }
 
+  function handleError(errorCode) {
+    switch(errorCode){
+      case "auth/account-exists-with-different-credential":
+        setError({
+          title: "Wrong Credentials",
+          message: "Your account was created with a different login method. Please use that login method to sign in."
+        })
+        break
+      case "auth/invalid-email":
+        setError({
+          title: "Invalid Email",
+          message: "Please enter a valid email address."
+        })
+        break
+      case "auth/user-disabled":
+        setError({
+          title: "Account Disabled",
+          message: "Your account has been disabled. Please contact support."
+        })
+        break
+      case "auth/user-not-found":
+        setError({
+          title: "Account Not Found",
+          message: "Your account was not found. Please sign up."
+        })
+        break
+      case "auth/too-many-requests":
+        setError({
+          title: "Too Many Requests",
+          message: "Too many failed login attempts. Please try again later."
+        })
+        break
+      case "auth/popup-closed-by-user":
+        setError({
+          title: "Popup Closed",
+          message: "The popup has been closed. Please try again."
+        })
+        break
+      case "auth/popup-blocked":
+        setError({
+          title: "Popup Blocked",
+          message: "The popup has been blocked. Please unblock it and try again."
+        })
+        break
+      case "auth/network-request-failed":
+        setError({
+          title: "Network Error",
+          message: "Network request failed. Please try again."
+        })
+        break
+      case "auth/email-already-in-use":
+        setError({
+          title: "Email Already In Use",
+          message: "The email address is already in use by another account. Please use a different email address."
+        })
+        break
+      default:
+        setError({
+          title: "Invalid Credentials",
+          message: "Incorrect email address and / or password. If your account was created with a different login method, please use that method to sign in. You can then link your account through the account settings."
+        })
+        break
+    }
+  }
 
   const handleSignUp = (state) => {
     if(state === "normal"){
       const regex = new RegExp("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
       if(!regex.test(email)){
-        console.log("Invalid email, add an error message or a toaster")
+        setError({
+          message: "Please enter a valid email address.",
+          type: "email"
+        })
         return
       }
-      if(password.length < 6 || password !== confirmPassword){
-        console.log("Invalid password, add an error message or a toaster")
+      if(password.length < 6){
+        setError({
+          message: "Password must be at least 6 characters.",
+          type: "password"
+        })
+        return
+      }
+      if(password !== confirmPassword){
+        setError({
+          message: "Passwords do not match.",
+          type: "confirm-password"
+        })
         return
       }
       register(email, password)
@@ -58,6 +138,7 @@ const SignUp = () => {
 
       if(provider){
         setLoading(true)
+        localStorage.setItem("signup-method", state)
         signInWithRedirect(auth, provider);
         // .then((result) => {
         //   // This gives you a GitHub Access Token. You can use it to access the GitHub API.
@@ -89,11 +170,24 @@ const SignUp = () => {
       if(e.key === "Enter" && auth){
         const regex = new RegExp("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
         if(!regex.test(email)){
-          console.log("Invalid email, add an error message or a toaster")
+          setError({
+            message: "Please enter a valid email address.",
+            type: "email"
+          })
           return
         }
-        if(password.length < 6 || password !== confirmPassword){
-          console.log("Invalid password, add an error message or a toaster")
+        if(password.length < 6){
+          setError({
+            message: "Password must be at least 6 characters.",
+            type: "password"
+          })
+          return
+        }
+        if(password !== confirmPassword){
+          setError({
+            message: "Passwords do not match.",
+            type: "confirm-password"
+          })
           return
         }
         setLoading(true)
@@ -104,6 +198,7 @@ const SignUp = () => {
         })
         .catch((error) => {
           console.log(error)
+          handleError(error.code)
           setLoading(false)
         })
         setLoading(false)
@@ -135,26 +230,60 @@ const SignUp = () => {
     }
   }, [user])
 
+  // useEffect(() => {
+  //   if(!auth)return
+  //   getRedirectResult(auth)
+  //   .then((result) => {
+  //     setUser(result.user)
+  //     setLoading(false)
+  //   })
+  //   .catch((error) => {
+  //     console.log(error)
+  //   })
+  // }, [])
+
   useEffect(() => {
     if(!auth)return
-    getRedirectResult(auth)
-  }, [])
+    if(localStorage["signup-method"]){
+      delete localStorage["signup-method"]
+      getRedirectResult(auth)
+      .then((result) => {
+        setUser(result.user)
+        setLoading(false)
+      })
+      .catch((error) => {
+        handleError(error.code)
+        setLoading(false)
+      })
+    }
+  }, [auth])
   return (
-    <Container>
+    <Container error={error?.message}>
       <div className='content-container'>
+
         <h3>Sign Up</h3>
+        {error && !error?.type && <ErrorBlob {...error} />}
         <ul>
-          <li>
+          <li className={['email', error?.type === 'email' ? 'error' : ''].join(' ')}>
             <p>Email/Username</p>
-            <input type='text' placeholder='Type here' value={email} onChange={(e) => setEmail(e.target.value)} />
+            <input type='text' placeholder='Type here' value={email} onChange={(e) => {
+              setEmail(e.target.value)
+              setError()
+              }} />
           </li>
-          <li>
+          <li className={['password', error?.type === 'password' ? 'error' : ''].join(' ')}>
             <p>Password</p>
-            <input type='password' placeholder='Type here' value={password} onChange={(e) => setPassword(e.target.value)} />
+            <input type='password' placeholder='Type here' value={password} onChange={(e) => {
+              setPassword(e.target.value)
+              setError()
+            }} />
           </li>
-          <li>
+          <li className={['confirm-password', error?.type === 'confirm-password' ? 'error' : ''].join(' ')}>
             <p>Confirm Password</p>
-            <input type='password' placeholder='Type here' value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+            <input type='password' placeholder='Type here' value={confirmPassword} onChange={(e) => {
+              setConfirmPassword(e.target.value)
+              setError()
+              }} />
           </li>
         </ul>
         <button onClick={() => handleSignUp("normal")}>Sign Up</button>
@@ -199,6 +328,8 @@ const Container = styled.div`
       gap: 1em;
       width: 100%;
       li{
+        display: flex;
+        flex-direction: column;
         p{
           font-size: 14px;
           line-height: 1.5em;
@@ -214,6 +345,28 @@ const Container = styled.div`
             outline:2px solid var(--md-sys-color-primary);
             border-color: transparent;
           }
+        }
+        &.error{
+          input{
+            outline:2px solid var(--md-sys-color-error);
+            border-color: transparent;
+          }
+          &::after{
+            display: block;
+            color: var(--md-sys-color-error);
+            font-size: 0.9em;
+            padding-top: 0.3em;
+          }
+          /* border-color: var(--md-sys-color-error) */
+        }
+        &.email.error::after{
+          content: "Please enter a valid email address.";
+        }
+        &.password.error::after{
+          content: "Password must be at least 6 characters.";
+        }
+        &.confirm-password.error::after{
+          content: "Passwords do not match.";
         }
       }
     }
