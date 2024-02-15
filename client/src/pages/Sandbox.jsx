@@ -314,6 +314,20 @@ const Sandbox = () => {
         </svg>
       </div>
       <button onClick={() => resetNodes()}>Reset Node States</button>
+      <div className='states'>
+        <div className='state'>
+          <div className='circle green'></div>
+          <p>Safe</p>
+        </div>
+        <div className='state'>
+          <div className='circle orange'></div>
+          <p>Stuck</p>
+        </div>
+        <div className='state'>
+          <div className='circle red'></div>
+          <p>Compromised</p>
+        </div>
+      </div>
     </Container>
   )
 }
@@ -351,6 +365,26 @@ const Container = styled.div`
       display: flex;
       flex-direction: column;
       width: 100px;
+    }
+  }
+  .states{
+    display: flex;
+    flex-direction: row;
+    gap: 1em;
+    justify-content: center;
+    .circle{
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      &.green{
+        background-color: green;
+      }
+      &.orange{
+        background-color: orange;
+      }
+      &.red{
+        background-color: red;
+      }
     }
   }
 `
