@@ -1,20 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { v4 as uuidv4 } from 'uuid'
 import Node from '../components/Node'
 import InputModal from '../components/InputModal'
-import { initializeApp } from 'firebase/app'
-import { getFirestore, doc, setDoc } from 'firebase/firestore'
+import { doc, setDoc } from 'firebase/firestore'
+import { AuthContext } from '../hook/AuthContext'
 
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_CONFIG_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_CONFIG_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_CONFIG_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_CONFIG_STORAGE_BUCKET,
-  messagingSenderId:import.meta.env.VITE_FIREBASE_CONFIG_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_CONFIG_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_CONFIG_MEASUREMENT_ID
-};
 
 const Admin = () => {
   // Add checks to make sure the paths have at least one exit and any other thing you can think of
@@ -23,8 +14,7 @@ const Admin = () => {
   // Add save and load
   // Create a buffer so the circle created isn't out of bounds
   // Add a way to delete nodes from the displayed array too (create a dialog box for delete confirmation)
-  const app = initializeApp(firebaseConfig)
-  const db = getFirestore(app)
+  const { db } = useContext(AuthContext)
 
   const svgRef = useRef()
 
@@ -167,9 +157,7 @@ const Admin = () => {
           y: svgRef.current.clientHeight * Math.random(),
         },
         connections: [],
-        paths: [],
-        disabledPaths: [],
-        isDisabled: false,
+        state: "safe", // safe, compromised, stuck
         isExit: false
       }
     })
@@ -197,16 +185,15 @@ const Admin = () => {
     // validate nodes
     setOpenFloorModal(false)
     const floorId = uuidv4()
-    await setDoc(doc(db, "floors", floorId), { 
-      name: floorName,
-      buildingId: "DF6QbHKTyxHlBnf4MBeZ",
-      connectUsers: [],
-    })
-
+    
     if(validateNodes()){
+      await setDoc(doc(db, "buildings", "DF6QbHKTyxHlBnf4MBeZ", "floors", floorId), { 
+        name: floorName,
+        connectUsers: [],
+      })
       for(const nodeKey in nodes){
         await setDoc(
-          doc(db, "floors", floorId, "nodes", nodeKey), nodes[nodeKey]
+          doc(db, "buildings", "DF6QbHKTyxHlBnf4MBeZ", "floors", floorId, "nodes", nodeKey), nodes[nodeKey]
         )
       }
       localStorage.setItem("nodes", "{}")

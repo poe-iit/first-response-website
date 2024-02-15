@@ -14,6 +14,7 @@ const Login = () => {
   const [password, setPassword] = useState('')
   const navigate = useNavigate()
 
+  // Add check for email and password length to reduce server requests
   const [errorBlob, setErrorBlob] = useState()
 
   const { setUser, setLoading, setUserData, userData, auth, user, db } = useContext(AuthContext)

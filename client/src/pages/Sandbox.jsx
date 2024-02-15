@@ -1,23 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
-import { initializeApp } from 'firebase/app'
-import { getFirestore, getDocs, collection } from 'firebase/firestore'
+import { collection, doc, getDocs, updateDoc, onSnapshot } from 'firebase/firestore'
 import FloorDropDown from '../components/FloorDropDown';
 import { useGesture } from '@use-gesture/react'
-
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_CONFIG_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_CONFIG_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_CONFIG_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_CONFIG_STORAGE_BUCKET,
-  messagingSenderId:import.meta.env.VITE_FIREBASE_CONFIG_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_CONFIG_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_CONFIG_MEASUREMENT_ID
-};
+import { AuthContext } from '../hook/AuthContext'
 
 const Sandbox = () => {
-  const app = initializeApp(firebaseConfig)
-  const db = getFirestore(app)
+  const { db } = useContext(AuthContext)
 
   const svgRef = useRef()
 
@@ -28,23 +17,43 @@ const Sandbox = () => {
 
   const [paths, setPaths] = useState()
 
-  const getNodes = async () => {
-    if(!floorId?.length) {
-      setNodes({})
-      return
-    }
-    const collectionRef = collection(db, "floors", floorId, "nodes")
-    const collectionSnap = await getDocs(collectionRef)
-
-    const tempNode = {}
-    for(const docSnap of collectionSnap.docs){
-      tempNode[docSnap.id] = docSnap.data()
-    }
-    setNodes(tempNode)
-  }
-
   useEffect(() => {
-    getNodes()
+    if(!floorId?.length) return
+    // getNodes()
+    const unsubscribe = onSnapshot(collection(db, "buildings", "DF6QbHKTyxHlBnf4MBeZ", "floors", floorId, "nodes"), (collectionSnap) => {
+      const tempNodes = {}
+      for(const docSnap of collectionSnap.docs){
+        tempNodes[docSnap.id] = docSnap.data()
+      }
+
+      const paths = []
+
+      for(const nodeId in tempNodes){
+        if(tempNodes[nodeId].state !== "compromised")tempNodes[nodeId].state = 1
+        if(tempNodes[nodeId].isExit)paths.push(nodeId)
+      }
+
+      for(const path of paths){
+        const queue = [[null, path]]
+        for(const [prevNode, nodeId] of queue){
+          if(tempNodes[nodeId].state === "compromised")continue
+          tempNodes[nodeId].state = "safe"
+          for(const connections of tempNodes[nodeId].connections){
+            if(connections === prevNode)continue
+            if(tempNodes[connections].state === 1)queue.push([nodeId, connections])
+          }
+        }
+      }
+
+      for(const nodeId in tempNodes){
+        if(tempNodes[nodeId].state === 1){
+          tempNodes[nodeId].state = "stuck"
+        }
+      }
+
+      setNodes(tempNodes)
+    })
+    return unsubscribe
   }, [floorId])
 
   useEffect(() => {
@@ -113,29 +122,36 @@ const Sandbox = () => {
 
   const alarmNode = (nodeId) => {
     const tempNodes = JSON.parse(JSON.stringify(nodes))
-    tempNodes[nodeId].isDisabled = true
+    tempNodes[nodeId].state = "compromised"
+
+    updateDoc(doc(db, "buildings", "DF6QbHKTyxHlBnf4MBeZ", "floors", floorId, "nodes", nodeId), {
+      state: "compromised"
+    })
+    
 
     const paths = []
 
     for(const nodeId in tempNodes){
-      if(!tempNodes[nodeId].isDisabled)tempNodes[nodeId].isDisabled = 1
+      if(tempNodes[nodeId].state !== "compromised")tempNodes[nodeId].state = 1
       if(tempNodes[nodeId].isExit)paths.push(nodeId)
     }
 
     for(const path of paths){
       const queue = [[null, path]]
       for(const [prevNode, nodeId] of queue){
-        if(tempNodes[nodeId].isDisabled === true)continue
-        tempNodes[nodeId].isDisabled = false
+        if(tempNodes[nodeId].state === "compromised")continue
+        tempNodes[nodeId].state = "safe"
         for(const connections of tempNodes[nodeId].connections){
           if(connections === prevNode)continue
-          if(tempNodes[connections].isDisabled === 1)queue.push([nodeId, connections])
+          if(tempNodes[connections].state === 1)queue.push([nodeId, connections])
         }
       }
     }
 
     for(const nodeId in tempNodes){
-      if(tempNodes[nodeId].isDisabled === 1)tempNodes[nodeId].isDisabled = true
+      if(tempNodes[nodeId].state === 1){
+        tempNodes[nodeId].state = "stuck"
+      }
     }
 
     setNodes(tempNodes)
@@ -195,10 +211,17 @@ const Sandbox = () => {
   const resetNodes = () => {
     const tempNodes = JSON.parse(JSON.stringify(nodes))
     for(const nodeId in tempNodes){
-      tempNodes[nodeId].isDisabled = false
+      tempNodes[nodeId].state = "safe"
+      updateDoc(doc(db, "buildings", "DF6QbHKTyxHlBnf4MBeZ", "floors", floorId, "nodes", nodeId), {
+        state: "safe"
+      })
     }
     setNodes(tempNodes)
   }
+
+  useEffect(() => {
+    console.log(JSON.stringify(nodes))
+  }, [nodes])
 
   useEffect(() => {
     if(nodes){
@@ -206,9 +229,9 @@ const Sandbox = () => {
         const distances = {}; // Store distances from the start node
         const prev = {}; // Store the previous node in the optimal path
         const visited = new Set(); // Track visited nodes
-        for(const node in nodes){
-          if(nodes[node].isDisabled)visited.add(node)
-        }
+        // for(const node in nodes){
+        //   if(nodes[node].isDisabled)visited.add(node)
+        // }
         const queue = []; // Priority queue of nodes to visit
       
         // Initialize distances and queue
@@ -250,7 +273,7 @@ const Sandbox = () => {
   
       // Example usage
       for(const node in nodes){
-        if(nodes[node].isExit && !nodes[node].isDisabled){
+        if(nodes[node].isExit && nodes[node].state !== "compromised"){
           const result = dijkstra(nodes, node);
           tempPaths[node] = {
             ...result
@@ -285,7 +308,7 @@ const Sandbox = () => {
           }
           {
             nodes && Object.keys(nodes).map((key) => {
-              return <circle key={key} cx={nodes[key].ui.x} cy={nodes[key].ui.y} r="20" fill={nodes[key].isDisabled ? "red" : nodes[key].isExit ? "blue" : "green" }onClick={() => alarmNode(key)}/>
+              return <circle key={key} cx={nodes[key].ui.x} cy={nodes[key].ui.y} r="20" fill={nodes[key].state === "compromised" ? "red" : nodes[key].state === "stuck" ? "orange" : nodes[key].isExit ? "blue" : "green" }onClick={() => alarmNode(key)}/>
             })
           }
         </svg>
