@@ -102,16 +102,26 @@ const Sandbox = () => {
         y2={nodeEnd.y} 
         stroke="black"
       />)
+
+      // Make this better and more understandable
+      // You get the position, then get the left and right by creating an arc around the line, then move the arrow forward by 6.5
+      let angle = Math.atan2(parseFloat(nodeEnd.y) - parseFloat(nodeStart.y), parseFloat(nodeEnd.x) - parseFloat(nodeStart.x))
+      if(angle < 0) angle += 2*Math.PI
+      angle += Math.PI
+      const radius = 10
+      const circleRadius = 20
+      console.log(angle)
+      const start = [parseFloat(nodeStart.x) - (circleRadius + 6.5) * Math.cos(angle), parseFloat(nodeStart.y) - (circleRadius + 6.5) * Math.sin(angle)]
+      const right = [radius * Math.cos(angle+Math.PI/4) + parseFloat(nodeStart.x) - (circleRadius + 6.5) * Math.cos(angle), radius * Math.sin(angle+Math.PI/4) + parseFloat(nodeStart.y) - (circleRadius + 6.5) * Math.sin(angle)]
+      const left = [radius * Math.cos(angle-Math.PI/4) + parseFloat(nodeStart.x) - (circleRadius + 6.5) * Math.cos(angle), radius * Math.sin(angle-Math.PI/4) + parseFloat(nodeStart.y) - (circleRadius + 6.5) * Math.sin(angle)]
+      // console.log(start, left, right)
       connections.push(
-        <polygon
+        <path
           key={key+"-"+distNode[1]+"-end"}
           id={key}
-          points={(nodeStart.x)+ "," + nodeStart.y + " " + (nodeStart.x - 10) + "," + (nodeStart.y - 10) + " " + (nodeStart.x - 10) + "," + (nodeStart.y)}
-          fill='black'
-          style={{
-            transformOrigin: (nodeStart.x) + "px " + (nodeStart.y) + "px",
-            transform: "rotate(" +( Math.atan2((nodeStart.y - nodeEnd.y), (nodeStart.x - nodeEnd.x)) * 180 / Math.PI + 45 ) + "deg)" + "\n" + "translate(-8px, 20px)"
-          }}
+          stroke='black'
+          fill="black"
+          d={`${"M"+start[0]} ${start[1]} ${"L"+left[0]} ${left[1]} ${"L"+right[0]} ${right[1]} Z`}
         />
       )
       set.add(key+", "+distNode[1])
@@ -365,7 +375,7 @@ const Container = styled.div`
         transform: translate(10px, 10px)
         scale(${props => props.$svgScale});
       } */
-      circle, line{
+      circle, line, path{
         transform-origin: 50% 50%;
         transform: 
         translate(${props => props.$svgPosition[0]}px, ${props => props.$svgPosition[1]}px)
