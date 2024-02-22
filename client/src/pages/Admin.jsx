@@ -4,8 +4,19 @@ import { v4 as uuidv4 } from 'uuid'
 import Node from '../components/Node'
 import InputModal from '../components/InputModal'
 import { doc, setDoc } from 'firebase/firestore'
+import { set, ref } from 'firebase/database'
 import { AuthContext } from '../hook/AuthContext'
 
+// Make sure all nodes have at least one connection/exit
+// Change connections to objects instead of array
+
+const convertArrToObj = (arr) => {
+  const obj = {}
+  for(let i = 0; i < arr.length; i++){
+    obj[i] = arr[i]
+  }
+  return obj
+}
 
 const Admin = () => {
   // Add checks to make sure the paths have at least one exit and any other thing you can think of
@@ -185,17 +196,21 @@ const Admin = () => {
     // validate nodes
     setOpenFloorModal(false)
     const floorId = uuidv4()
+
+    const tempNodes =  JSON.parse(localStorage.getItem("nodes"))
     
     if(validateNodes()){
-      await setDoc(doc(db, "buildings", "DF6QbHKTyxHlBnf4MBeZ", "floors", floorId), { 
+      await set(ref(db, `buildings/DF6QbHKTyxHlBnf4MBeZ/floors/${floorId}`), { 
         name: floorName,
-        connectUsers: [],
+        connectUsers: {},
+        nodes: {}
       })
-      for(const nodeKey in nodes){
-        await setDoc(
-          doc(db, "buildings", "DF6QbHKTyxHlBnf4MBeZ", "floors", floorId, "nodes", nodeKey), nodes[nodeKey]
-        )
+      for(const nodeId in tempNodes){
+        tempNodes[nodeId].connections = convertArrToObj(tempNodes[nodeId].connections)
       }
+      await set(
+        ref(db, `buildings/DF6QbHKTyxHlBnf4MBeZ/floors/${floorId}/nodes`), tempNodes
+      )
       localStorage.setItem("nodes", "{}")
       setConnectNodes([])
       setDisconnectNodes([])

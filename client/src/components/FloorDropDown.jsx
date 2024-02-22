@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { getDocs, collection } from 'firebase/firestore'
+import { get, ref } from 'firebase/database'
 import { AuthContext } from '../hook/AuthContext'
 
 
@@ -12,19 +13,22 @@ const FloorDropDown = ({ floorId, setFloorId}) => {
   useEffect(() => {
     if(db){
       (async () => {
-        const collectionRef = collection(db, "buildings", "DF6QbHKTyxHlBnf4MBeZ", "floors")
-        const collectionSnap = await getDocs(collectionRef)
-        setFloors(collectionSnap.docs.map(doc => {return {
-          ...doc.data(),
-          id: doc.id
-        }}))
+        const collectionRef = ref(db, "buildings/DF6QbHKTyxHlBnf4MBeZ/floors")
+        const collectionSnap = await get(collectionRef)
+        const tempFloors = collectionSnap.exists() ? collectionSnap.val() : {}
+        setFloors(tempFloors)
       })()
     }
   }, [db])
+
+  useEffect(() => {
+    console.log(floors)
+  }, [floors])
+
   return (
     <select defaultValue={floorId} onChange={e => setFloorId(e.target.value)}>
       <option value={""}>Select a floor</option>
-      {floors.map(floor => <option key={floor.id} value={floor.id}>{floor.name}</option>)}
+      {Object.keys(floors).map(key => <option key={key} value={key}>{floors[key].name}</option>)}
     </select>
   )
 }

@@ -2,7 +2,7 @@ import styled from 'styled-components'
 import { useContext, useEffect } from 'react'
 import { AuthContext } from '../hook/AuthContext'
 import { useNavigate } from 'react-router-dom'
-import { updateDoc, doc, deleteDoc } from 'firebase/firestore'
+import { set, ref } from 'firebase/database'
 import { deleteUser} from "firebase/auth"
 
 const AccountConfirmation = () => {
@@ -12,11 +12,11 @@ const AccountConfirmation = () => {
     if(!userData || !userData.newUser)navigate("/")
   }, [])
   const handleAccountConfirmation = async () => {
-    await updateDoc(doc(db, "users", user.uid), {newUser: false})
+    await set(ref(db, `users/${user.uid}/newUser`), false)
     navigate("/")
   }
   const handleAccountDeletion = async () => {
-    await deleteDoc(doc(db, "users", user.uid))
+    await set(ref(db, `users/${user.uid}`), null)
     await deleteUser(auth.currentUser)
     navigate("/")
   }

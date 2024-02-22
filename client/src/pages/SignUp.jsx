@@ -7,8 +7,8 @@ import GoogleIcon from "@mui/icons-material/Google"
 import { AuthContext } from '../hook/AuthContext';
 import { createUserWithEmailAndPassword, GithubAuthProvider, GoogleAuthProvider, FacebookAuthProvider, signInWithRedirect, getRedirectResult } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-import { doc, setDoc } from 'firebase/firestore'
 import ErrorBlob from "../components/ErrorBlob";
+import { ref, set } from 'firebase/database';
 
 const SignUp = () => {
   const [email, setEmail] = useState('')
@@ -211,7 +211,7 @@ const SignUp = () => {
   useEffect(() => {
     if(user){
       (async () => {
-        await setDoc(doc(db, "users", user.uid), {
+        await set(ref(db, `users/${user.uid}`), {
           email: user.email,
           name: user.displayName,
           photoURL: user.photoURL,

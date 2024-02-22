@@ -6,8 +6,8 @@ import FacebookIcon from '@mui/icons-material/Facebook';
 import GoogleIcon from "@mui/icons-material/Google"
 import { AuthContext } from "../hook/AuthContext";
 import { GithubAuthProvider, GoogleAuthProvider, FacebookAuthProvider, signInWithEmailAndPassword, signInWithRedirect, getRedirectResult } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore'
 import ErrorBlob from "../components/ErrorBlob";
+import { get, set, ref } from "firebase/database";
 
 const Login = () => {
   const [email, setEmail] = useState(localStorage.getItem("login-email") || '')
@@ -179,11 +179,11 @@ const Login = () => {
   useEffect(() => {
     if(user){
       (async () => {
-        const userRef = doc(db, "users", user.uid)
-        getDoc(userRef)
-        .then(async docSnap => {
+
+        await get(ref(db, `users/${user.uid}`))
+        .then(async (docSnap) => {
           if(!docSnap.exists()){
-            await setDoc(doc(db, "users", user.uid), {
+            await set(ref(db, `users/${user.uid}`), {
               email: user.email,
               name: user.displayName,
               photoURL: user.photoURL,
@@ -194,9 +194,25 @@ const Login = () => {
               newUser: true
             })
           }
-      })
+          // navigate("/")
+        })
+        // const userRef = doc(db, "users", user.uid)
+        // getDoc(userRef)
+        // .then(async docSnap => {
+        //   if(!docSnap.exists()){
+        //     await setDoc(doc(db, "users", user.uid), {
+        //       email: user.email,
+        //       name: user.displayName,
+        //       photoURL: user.photoURL,
+        //       newUser: true
+        //     })
+        //     setUserData({
+        //       ...userData,
+        //       newUser: true
+        //     })
+        //   }
+        // })
       })()
-      navigate("/")
     }
   }, [user])
 
