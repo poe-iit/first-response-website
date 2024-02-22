@@ -10,7 +10,8 @@ import { AuthContext } from "./hook/AuthContext"
 import { useEffect, useState } from "react"
 import { initializeApp } from "firebase/app"
 import { getAuth, getRedirectResult, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, getDoc, doc } from "firebase/firestore";
+import { get, ref } from "firebase/database"
+import { getDatabase } from "firebase/database"
 import Home from "./pages/Home"
 import AccountConfirmation from "./pages/AccountConfirmation"
 
@@ -21,7 +22,8 @@ const firebaseConfig = {
   storageBucket: import.meta.env.VITE_FIREBASE_CONFIG_STORAGE_BUCKET,
   messagingSenderId:import.meta.env.VITE_FIREBASE_CONFIG_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_CONFIG_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_CONFIG_MEASUREMENT_ID
+  measurementId: import.meta.env.VITE_FIREBASE_CONFIG_MEASUREMENT_ID,
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL
 };
 
 function App() {
@@ -40,15 +42,14 @@ function App() {
   
   useEffect(() => {
     if(user){
-      const userRef = doc(db, "users", user.uid)
-      getDoc(userRef)
-      .then(docSnap => {
+      const userRef = ref(db, `users/${user.uid}`)
+      get(userRef).then(docSnap => {
         if(docSnap.exists()){
-          setUserData(docSnap.data())
+          console.log(docSnap)
+          setUserData(docSnap.toJSON())
         }
       })
     }
-    console.log(user)
   }, [user])
 
   useEffect(() => {
@@ -59,7 +60,7 @@ function App() {
   useEffect(() => {
     if(!app) return
     setAuth(getAuth(app))
-    setDB(getFirestore(app))
+    setDB(getDatabase(app))
   }, [app])
 
   useEffect(() => {
@@ -77,6 +78,7 @@ function App() {
   }, [auth])
 
   useEffect(() => {
+    console.log(userData)
     if(userData && userData.newUser){
       navigate("/account-confirmation")
     }

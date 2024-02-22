@@ -1,9 +1,26 @@
 import React, { useContext, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { collection, doc, getDocs, updateDoc, onSnapshot } from 'firebase/firestore'
+import { onValue, ref, set } from 'firebase/database'
 import FloorDropDown from '../components/FloorDropDown';
 import { useGesture } from '@use-gesture/react'
 import { AuthContext } from '../hook/AuthContext'
+
+const convertObjToArr = (obj) => {
+  const arr = []
+  for(const key in obj){
+    arr.push(obj[key])
+  }
+  return arr
+}
+
+const convertArrToObj = (arr) => {
+  const obj = {}
+  for(let i = 0; i < arr.length; i++){
+    obj[i] = arr[i]
+  }
+  return obj
+}
 
 const Sandbox = () => {
   const { db } = useContext(AuthContext)
@@ -20,11 +37,15 @@ const Sandbox = () => {
   useEffect(() => {
     if(!floorId?.length) return
     // getNodes()
-    const unsubscribe = onSnapshot(collection(db, "buildings", "DF6QbHKTyxHlBnf4MBeZ", "floors", floorId, "nodes"), (collectionSnap) => {
-      const tempNodes = {}
-      for(const docSnap of collectionSnap.docs){
-        tempNodes[docSnap.id] = docSnap.data()
+    console.log(floorId)
+    const unsubscribe = onValue(ref(db, `buildings/DF6QbHKTyxHlBnf4MBeZ/floors/${floorId}/nodes`), (collectionSnap) => {
+      const tempNodes = collectionSnap.exists() ? JSON.parse(JSON.stringify(collectionSnap.val())) : {}
+
+      for(const nodeId in tempNodes){
+        tempNodes[nodeId].connections = convertObjToArr(tempNodes[nodeId].connections)
       }
+
+      console.log(tempNodes)
 
       const paths = []
 
@@ -124,9 +145,7 @@ const Sandbox = () => {
     const tempNodes = JSON.parse(JSON.stringify(nodes))
     tempNodes[nodeId].state = "compromised"
 
-    updateDoc(doc(db, "buildings", "DF6QbHKTyxHlBnf4MBeZ", "floors", floorId, "nodes", nodeId), {
-      state: "compromised"
-    })
+    set(ref(db, `buildings/DF6QbHKTyxHlBnf4MBeZ/floors/${floorId}/nodes/${nodeId}/state`), "compromised")
     
 
     const paths = []
@@ -212,9 +231,7 @@ const Sandbox = () => {
     const tempNodes = JSON.parse(JSON.stringify(nodes))
     for(const nodeId in tempNodes){
       tempNodes[nodeId].state = "safe"
-      updateDoc(doc(db, "buildings", "DF6QbHKTyxHlBnf4MBeZ", "floors", floorId, "nodes", nodeId), {
-        state: "safe"
-      })
+      set(ref(db, `buildings/DF6QbHKTyxHlBnf4MBeZ/floors/${floorId}/nodes/${nodeId}/state`), "safe")
     }
     setNodes(tempNodes)
   }

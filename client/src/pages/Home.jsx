@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react"
+import { useContext } from "react"
 import { AuthContext } from "../hook/AuthContext"
 import { signOut } from "firebase/auth"
 
