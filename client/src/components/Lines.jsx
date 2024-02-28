@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 const Lines = ({ nodes }) => {
   const [lines, setLines] = useState([])
   const [paths, setPaths] = useState()
+  const [initialPaths, setInitialPaths] = useState()
 
   // Split this component into lines and arrows
 
@@ -73,6 +74,84 @@ const Lines = ({ nodes }) => {
   }, [nodes])
 
   useEffect(() => {
+    if(nodes){
+      if(initialPaths){
+        let continual = false
+        for(const node in nodes){
+          if((nodes[node].state === "compromised" && node in initialPaths) || (nodes[node].state !== "compromised" && nodes[node].isExit && !(node in initialPaths))){
+            continual = true
+            break
+          }
+        }
+        if(!continual)return
+      }
+      function dijkstra(graph, startNode) {
+        const distances = {}; // Store distances from the start node
+        const prev = {}; // Store the previous node in the optimal path
+        const visited = new Set(); // Track visited nodes
+        // This part was commentted but just make dijkstra run twice and then add arrows to the nodes without arrows
+        // Probably run it at the first load so you can always reference it since it won't change
+        // You'll have the initial that points to the closest and this algorithm that points to the closest that is safe, and if a node is compromised or stuck you use the initial
+
+        // for(const node in nodes){
+        //   if(nodes[node].state === "compromised")visited.add(node)
+        // }
+
+        // Make compromised nodes of lower priority
+        // But howww
+        const queue = []; // Priority queue of nodes to visit
+      
+        // Initialize distances and queue
+        for (let node in graph) {
+          distances[node] = Infinity;
+          queue.push(node);
+          prev[node] = null;
+        }
+        distances[startNode] = 0;
+      
+        while (queue.length !== 0) {
+          // Sort queue by distance (simple priority queue)
+          queue.sort((a, b) => distances[a] - distances[b]);
+          const currentNode = queue.shift(); // Node with the shortest distance
+          visited.add(currentNode);
+      
+          for (let neighbor of graph[currentNode].connections) {
+            if (visited.has(neighbor)) continue; // Skip visited nodes
+      
+            // Calculate new distance
+            const newDistance = distances[currentNode] + (
+              (
+                graph[currentNode].ui.x - graph[neighbor].ui.x
+              )**2 + (
+                graph[currentNode].ui.y - graph[neighbor].ui.y
+              )**2
+            )**(1/2);
+            if (newDistance < distances[neighbor]) {
+              distances[neighbor] = newDistance; // Update distance
+              prev[neighbor] = currentNode; // Update path
+            }
+          }
+        }
+      
+        return { distances, prev };
+      }
+
+      const tempPaths = {}
+  
+      // Example usage
+      for(const node in nodes){
+        if(nodes[node].isExit && nodes[node].state !== "compromised"){
+          const result = dijkstra(nodes, node);
+          tempPaths[node] = {
+            ...result
+          }
+        }
+      }
+      setInitialPaths(tempPaths)
+    }
+  }, [nodes])
+
+  useEffect(() => {
     if(!paths)return
     const set = new Set()
     const connections = []
@@ -82,6 +161,13 @@ const Lines = ({ nodes }) => {
       for(const exit in paths){
         if(paths[exit].distances[key] && paths[exit].distances[key] < distNode[0]){
           distNode = [paths[exit].distances[key], paths[exit].prev[key]]
+        }
+      }
+      if(distNode[0] === Number.MAX_SAFE_INTEGER){
+        for(const exit in initialPaths){
+          if(initialPaths[exit].distances[key] && initialPaths[exit].distances[key] < distNode[0]){
+            distNode = [initialPaths[exit].distances[key], initialPaths[exit].prev[key]]
+          }
         }
       }
 
@@ -143,7 +229,7 @@ const Lines = ({ nodes }) => {
       }
     }
     setLines(connections)
-  }, [paths])
+  }, [paths, initialPaths])
 
   return (
     <>
