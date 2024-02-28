@@ -74,17 +74,8 @@ const Lines = ({ nodes }) => {
   }, [nodes])
 
   useEffect(() => {
+    if(initialPaths)return
     if(nodes){
-      if(initialPaths){
-        let continual = false
-        for(const node in nodes){
-          if((nodes[node].state === "compromised" && node in initialPaths) || (nodes[node].state !== "compromised" && nodes[node].isExit && !(node in initialPaths))){
-            continual = true
-            break
-          }
-        }
-        if(!continual)return
-      }
       function dijkstra(graph, startNode) {
         const distances = {}; // Store distances from the start node
         const prev = {}; // Store the previous node in the optimal path
@@ -140,7 +131,7 @@ const Lines = ({ nodes }) => {
   
       // Example usage
       for(const node in nodes){
-        if(nodes[node].isExit && nodes[node].state !== "compromised"){
+        if(nodes[node].isExit){
           const result = dijkstra(nodes, node);
           tempPaths[node] = {
             ...result
@@ -165,6 +156,7 @@ const Lines = ({ nodes }) => {
       }
       if(distNode[0] === Number.MAX_SAFE_INTEGER){
         for(const exit in initialPaths){
+          if( nodes[exit].state === "compromised")continue
           if(initialPaths[exit].distances[key] && initialPaths[exit].distances[key] < distNode[0]){
             distNode = [initialPaths[exit].distances[key], initialPaths[exit].prev[key]]
           }
@@ -229,7 +221,7 @@ const Lines = ({ nodes }) => {
       }
     }
     setLines(connections)
-  }, [paths, initialPaths])
+  }, [paths, initialPaths, nodes])
 
   return (
     <>
