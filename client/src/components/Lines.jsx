@@ -74,7 +74,12 @@ const Lines = ({ nodes }) => {
   }, [nodes])
 
   useEffect(() => {
-    if(initialPaths)return
+    let skip = true
+    for(const exit in initialPaths){
+      if(!(exit in nodes) || !nodes[exit].isExit)skip = false
+    }
+    if(!initialPaths)skip = false
+    if(skip)return
     if(nodes){
       function dijkstra(graph, startNode) {
         const distances = {}; // Store distances from the start node
@@ -143,7 +148,7 @@ const Lines = ({ nodes }) => {
   }, [nodes])
 
   useEffect(() => {
-    if(!paths || !initialPaths || !nodes)return
+    if(!paths || !initialPaths)return
     const set = new Set()
     const connections = []
     for(const key in nodes){
@@ -156,6 +161,7 @@ const Lines = ({ nodes }) => {
       }
       if(distNode[0] === Number.MAX_SAFE_INTEGER){
         for(const exit in initialPaths){
+          console.log(exit, initialPaths, nodes)
           if( nodes[exit].state === "compromised")continue
           if(initialPaths[exit].distances[key] && initialPaths[exit].distances[key] < distNode[0]){
             distNode = [initialPaths[exit].distances[key], initialPaths[exit].prev[key]]
@@ -221,7 +227,7 @@ const Lines = ({ nodes }) => {
       }
     }
     setLines(connections)
-  }, [paths, initialPaths, nodes])
+  }, [paths, initialPaths])
 
   return (
     <>
