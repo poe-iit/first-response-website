@@ -143,7 +143,7 @@ const Lines = ({ nodes }) => {
   }, [nodes])
 
   useEffect(() => {
-    if(!paths)return
+    if(!paths || !initialPaths || !nodes)return
     const set = new Set()
     const connections = []
     for(const key in nodes){
