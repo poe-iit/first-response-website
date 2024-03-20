@@ -1,8 +1,12 @@
 import styled from 'styled-components'
 import RemoveIcon from '@mui/icons-material/Remove';
 import AddIcon from '@mui/icons-material/Add';
+import { useContext } from 'react';
+import { CanvasContext } from '../hook/CanvasContext';
 
-const ZoomControls = ({setSvgScale, svgScale}) => {
+const ZoomControls = () => {
+
+  const { setSvgScale, scale: svgScale} = useContext(CanvasContext)
   return (
     <Container>
       <button onClick={
