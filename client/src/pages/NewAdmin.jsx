@@ -1,16 +1,16 @@
 import styled from 'styled-components'
-import Canvas from '../components/Canvas';
+import AdminCanvas from '../components/AdminCanvas';
 
-const Sandbox = () => {
+const NewAdmin = () => {
 
   return (
     <Container>
-      <Canvas />
+      <AdminCanvas />
     </Container>
   )
 }
 
-export default Sandbox
+export default NewAdmin
 
 const Container = styled.div`
   width: 100vw;
