@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
+import { CanvasContext } from '../hook/CanvasContext'
 
-const Lines = ({ nodes }) => {
+const Lines = () => {
+  const { nodes } = useContext(CanvasContext)
   const [lines, setLines] = useState([])
   const [paths, setPaths] = useState()
   const [initialPaths, setInitialPaths] = useState()

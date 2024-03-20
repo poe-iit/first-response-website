@@ -1,17 +1,30 @@
-import { useContext } from 'react'
-import { set, ref } from "firebase/database"
-import { AuthContext } from '../hook/AuthContext'
+import { useContext } from "react"
+import { CanvasContext } from "../hook/CanvasContext"
 
-const Nodes = ({nodes, setNodes, floorId, mouseState}) => {
+const Nodes = () => {
 
-  const { db } = useContext(AuthContext) 
+  const { nodes, floor, mouseState } = useContext(CanvasContext)
 
   const alarmNode = (nodeId) => {
+    if(!floor?.id)return
     if(mouseState !== "danger")return
     const tempNodes = JSON.parse(JSON.stringify(nodes))
     tempNodes[nodeId].state = tempNodes[nodeId].state === "compromised" ? "safe" : "compromised"
 
-    set(ref(db, `buildings/DF6QbHKTyxHlBnf4MBeZ/floors/${floorId}/nodes/${nodeId}/state`), tempNodes[nodeId].state)
+    console.log(tempNodes)
+    console.log(floor.id, nodeId)
+
+    fetch(`${import.meta.env.VITE_SERVER_URL}/floor/${floor.id}/nodes`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        [nodeId]: tempNodes[nodeId].state
+      })
+    })
+
+    // set(ref(db, `buildings/DF6QbHKTyxHlBnf4MBeZ/floors/${floorId}/nodes/${nodeId}/state`), tempNodes[nodeId].state)
     
     // Important don't delete this
 
@@ -47,7 +60,7 @@ const Nodes = ({nodes, setNodes, floorId, mouseState}) => {
     <>
       {
         nodes && Object.keys(nodes).map((key) => {
-          return <circle key={key} cx={nodes[key].ui.x} cy={nodes[key].ui.y} r="20" fill={nodes[key].state === "compromised" ? "red" : nodes[key].state === "stuck" ? "orange" : nodes[key].isExit ? "blue" : "green" } onClick={() => alarmNode(key)}/>
+          return <circle data-title={key} key={key} cx={nodes[key].ui.x} cy={nodes[key].ui.y} r="20" fill={nodes[key].state === "compromised" ? "red" : nodes[key].state === "stuck" ? "orange" : nodes[key].isExit ? "blue" : "green" } onClick={() => alarmNode(key)}/>
         })
       }
     </>

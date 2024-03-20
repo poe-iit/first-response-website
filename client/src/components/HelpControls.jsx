@@ -41,6 +41,10 @@ const HelpControls = () => {
                 <span>Compromised</span>
                 <span className='color'></span>
               </li>
+              <li id='exit'>
+                <span>Exit</span>
+                <span className='color'></span>
+              </li>
             </ul>
           </div>
         </div>
@@ -143,6 +147,9 @@ const Container = styled.div`
           }
           #compromised .color{
             background-color: red;
+          }
+          #exit .color{
+            background-color: blue;
           }
         }
       }
