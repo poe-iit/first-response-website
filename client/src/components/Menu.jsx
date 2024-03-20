@@ -1,9 +1,14 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import styled from 'styled-components'
 import MenuIcon from "@mui/icons-material/Menu"
+import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import CloseIcon from '@mui/icons-material/Close'
+import { FormControl, InputLabel, MenuItem, Select } from '@mui/material'
+import { CanvasContext } from '../hook/CanvasContext';
 
-const Menu = ({ floors, setFloorId, floorId }) => {
+const Menu = ({ floors, buildings }) => {
+
+  const {floor, setFloor, building, setBuilding} = useContext(CanvasContext)
   const [toggle, setToggle] = useState(false)
   const handleModal = (e) => {
     setToggle(!toggle)
@@ -11,12 +16,26 @@ const Menu = ({ floors, setFloorId, floorId }) => {
   const handleInteraction = (e) => {
     e.stopPropagation()
   }
+
+  const handleChange = (event) => {
+    setFloor(floors.find(curr => curr.id === event.target.value))
+  }
+
+  const handleBuilding = (event) => {
+    setBuilding(buildings.find(curr => curr._id === event.target.value))
+  }
+
   return (
     <Container>
       <button onClick={() => setToggle(!toggle)}>
-        <MenuIcon sx={{
-        fontSize: "1.5em",
-      }}/>
+        {toggle ? 
+          <MenuOpenIcon sx={{
+            fontSize: "1.5em",
+          }}/> :
+            <MenuIcon sx={{
+            fontSize: "1.5em",
+          }}/>
+        }
       </button>
       {
       toggle && <div className='modal' onClick={handleModal}>
@@ -26,13 +45,35 @@ const Menu = ({ floors, setFloorId, floorId }) => {
             <CloseIcon className='close' onClick={() => setToggle(!toggle)}/>
           </div>
           <div className='divider'></div>
-          <div className='floors'>
-            <h3>Floors</h3>
-            <ul>
-              {
-                Object.keys(floors).map((floorName, i) => <li key={i} className={floorId === floorName ? "selected" : ""} onClick={() => setFloorId(floorName)}>{floors[floorName]?.name || floorName}</li>)
-              }
-            </ul>
+          <div className='form-controls'>
+            <FormControl fullWidth>
+              <InputLabel id="demo-simple-select-label">Building</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={building?._id || 0}
+                label="Building"
+                onChange={handleBuilding}
+              >
+                {
+                  buildings.map((building, i) => <MenuItem key={i} value={building?._id}>{building?.name}</MenuItem>)
+                }
+              </Select>
+            </FormControl>
+            <FormControl fullWidth>
+              <InputLabel id="demo-simple-select-label">Floor</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={floor?.id || 0}
+                label="Building"
+                onChange={handleChange}
+              >
+                {
+                  floors.map((floor, i) => <MenuItem key={i} value={floor?.id}>{floor?.name}</MenuItem>)
+                }
+              </Select>
+            </FormControl>
           </div>
         </div>
       </div>
@@ -102,44 +143,10 @@ const Container = styled.div`
         }
         padding-bottom: 0.2em;
       }
-      .floors{
-        h3{
-          color: var(--md-sys-color-on-surface);
-          padding: 0.5em 0;
-        }
-        ul{
-          li{
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: start;
-            padding: 0.5em 0.5em;
-            border-radius: 0.4em;
-            cursor: pointer;
-            color: var(--md-sys-color-on-surface);
-            &:hover{
-              color: var(--md-sys-color-on-secondary-container);
-              background-color: var(--md-sys-color-secondary-container);
-            }
-            &.selected{
-              color: var(--md-sys-color-on-primary-container);
-              background-color: var(--md-sys-color-primary-container);
-            }
-            & ~ li{
-              margin-top: 0.3em;
-              position: relative;
-              
-            }
-            & ~ li::before{
-              position: absolute;
-              top: -0.15em;
-              left: 1em;
-              width: calc(100% - 2em);
-              content: "";
-              border-top: 1px solid var(--md-sys-color-outline-variant);
-            }
-          }
-        }
+      .form-controls{
+        display: flex;
+        flex-direction: column;
+        gap: 1em;
       }
     }
   }

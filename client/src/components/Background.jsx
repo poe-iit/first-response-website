@@ -1,6 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
+import { CanvasContext } from '../hook/CanvasContext'
 
-const Background = ({svgScale, svgPosition, svgRef}) => {
+const Background = ({ svgRef }) => {
+
+  const { scale: svgScale, position: svgPosition } = useContext(CanvasContext)
 
   const [backgroundPattern, setBackgroundPattern] = useState([])
 

@@ -1,112 +1,126 @@
-import { useContext } from 'react'
 import Background from './Background'
 import styled from 'styled-components'
 import { useEffect, useRef, useState } from 'react'
 import Lines from './Lines'
 import Nodes from './Nodes'
-import { AuthContext } from '../hook/AuthContext'
-import { onValue, ref, get } from 'firebase/database'
 import MainControls from './MainControls'
 import { useGesture } from '@use-gesture/react'
 import ZoomControls from './ZoomControls'
 import Menu from './Menu'
 import HelpControls from './HelpControls'
-
-const convertObjToArr = (obj) => {
-  const arr = []
-  for(const key in obj){
-    arr.push(obj[key])
-  }
-  return arr
-}
+import { CanvasContext } from '../hook/CanvasContext'
 
 const Canvas = () => {
-  const { db } = useContext(AuthContext)
 
   const [nodes, setNodes] = useState()
   const svgRef = useRef()
 
   const [floors, setFloors] = useState([])
-  const [floorId, setFloorId] = useState(localStorage.getItem("floorId") || "")
-
+  const [floor, setFloor] = useState(JSON.parse(localStorage.getItem("floor")) || {})
+  const [buildings, setBuildings] = useState([])
+  const [building, setBuilding] = useState(JSON.parse(localStorage.getItem("building")) || {})
+  const state = "view"
   const [mouseState, setMouseState] = useState(localStorage.getItem("mouseState") || "default")
-
   
-  
-  
-  // const floorId = "d16efd4b-21ac-4bb7-8d54-52ade69973c3"
-  
-  // const [floorId, setFloorId] = useState("d16efd4b-21ac-4bb7-8d54-52ade69973c3")
-  
-  const [locked, setLocked] = useState(JSON.parse(localStorage.getItem("locked")) || false)
+  const [locked, setLocked] = useState(false)
   
   const [svgPosition, setSvgPosition] = useState(JSON.parse(localStorage.getItem("svgPosition")) || [0, 0])
   const positionRef = useRef(svgPosition)
   const [svgScale, setSvgScale] = useState(JSON.parse(localStorage.getItem("svgScale")) || 1)
   const [origin, setOrigin] = useState([0, 0])
 
-
   useEffect(() => {
     localStorage["mouseState"] = mouseState
   }, [mouseState])
 
   useEffect(() => {
-    localStorage["floorId"] = floorId
-  }, [floorId])
+    localStorage["floor"] = JSON.stringify(floor)
+  }, [floor])
+
+  useEffect(() => {
+    localStorage["building"] = JSON.stringify(building)
+  }, [building])
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_SERVER_URL}/building`, {
+      method: "GET",
+    }).then(res => res.json())
+    .then(data => {
+      console.log(data)
+      setBuildings(data)
+    })
+  }, [])
   
   useEffect(() => {
     // Inefficient way to get all floors
     // Should be refactored
-    if(db){
-      (async () => {
-        const collectionRef = ref(db, "buildings/DF6QbHKTyxHlBnf4MBeZ/floors")
-        const collectionSnap = await get(collectionRef)
-        const tempFloors = collectionSnap.exists() ? collectionSnap.val() : {}
-        console.log(tempFloors)
-        setFloors(tempFloors)
-      })()
-    }
-  }, [db])
+    if(!building?._id) return
+    fetch(`${import.meta.env.VITE_SERVER_URL}/building/${building._id}`, {
+      method: "GET",
+    }).then(res => res.json())
+    .then(data => {
+      setFloors(data.floors)
+    })
+    .catch(err => console.log("Error Here: ", err))
+  }, [building])
+
 
   useEffect(() => {
-    if(!floorId?.length || !db) return
-    // getNodes()
-    const unsubscribe = onValue(ref(db, `buildings/DF6QbHKTyxHlBnf4MBeZ/floors/${floorId}/nodes`), (collectionSnap) => {
-      const tempNodes = collectionSnap.exists() ? JSON.parse(JSON.stringify(collectionSnap.val())) : {}
+    const ws = new WebSocket('wss://first-response-server.onrender.com');
 
-      for(const nodeId in tempNodes){
-        tempNodes[nodeId].connections = convertObjToArr(tempNodes[nodeId].connections)
-      }
+    ws.onopen = function() {
+      console.log('Connected to the server');
+      console.log(floor?.id)
+      ws.send(JSON.stringify({
+        type: "floor-update",
+        floorId: floor?.id || ""
+      }));
+    };
 
-      const paths = []
+    ws.onmessage = function(evt) {
+      const data = JSON.parse(evt.data)
+      console.log(data)
+      if(!data?.error){
 
-      for(const nodeId in tempNodes){
-        if(tempNodes[nodeId].state !== "compromised")tempNodes[nodeId].state = 1
-        if(tempNodes[nodeId].isExit)paths.push(nodeId)
-      }
+        const tempNodes = data.nodes
 
-      for(const path of paths){
-        const queue = [[null, path]]
-        for(const [prevNode, nodeId] of queue){
-          if(tempNodes[nodeId].state === "compromised")continue
-          tempNodes[nodeId].state = "safe"
-          for(const connections of tempNodes[nodeId].connections){
-            if(connections === prevNode)continue
-            if(tempNodes[connections].state === 1)queue.push([nodeId, connections])
+        const paths = []
+
+        for(const nodeId in tempNodes){
+          if(tempNodes[nodeId].state !== "compromised")tempNodes[nodeId].state = 1
+          if(tempNodes[nodeId].isExit)paths.push(nodeId)
+        }
+
+        for(const path of paths){
+          const queue = [[null, path]]
+          for(const [prevNode, nodeId] of queue){
+            if(tempNodes[nodeId].state === "compromised")continue
+            tempNodes[nodeId].state = "safe"
+            for(const connections of tempNodes[nodeId].connections){
+              if(connections === prevNode)continue
+              if(tempNodes[connections].state === 1)queue.push([nodeId, connections])
+            }
           }
         }
-      }
 
-      for(const nodeId in tempNodes){
-        if(tempNodes[nodeId].state === 1){
-          tempNodes[nodeId].state = "stuck"
+        for(const nodeId in tempNodes){
+          if(tempNodes[nodeId].state === 1){
+            tempNodes[nodeId].state = "stuck"
+          }
         }
-      }
 
-      setNodes(tempNodes)
-    })
-    return unsubscribe
-  }, [floorId, db])
+        setNodes(tempNodes)
+      }
+    };
+
+    ws.onclose = function() {
+      console.log('Disconnected from the server');
+    };
+
+    return () => {
+      ws.close()
+    }
+  }, [floor])
 
   useEffect(() => {
     localStorage["svgPosition"] = JSON.stringify(svgPosition)
@@ -154,17 +168,19 @@ const Canvas = () => {
   }, [])
 
   return (
-    <Container $svgPosition={svgPosition} $svgScale={svgScale} $origin={origin}>
-      <Menu floors={floors} floorId={floorId} setFloorId={setFloorId} />
-      <MainControls locked={locked} setLocked={setLocked} setNodes={setNodes} nodes={nodes} setSvgPosition={setSvgPosition} setSvgScale={setSvgScale} positionRef={positionRef} floorId={floorId} setMouseState={setMouseState} mouseState={mouseState}/>
-      <svg ref={svgRef}>
-        <Background svgPosition={svgPosition} svgScale={svgScale} svgRef={svgRef}/>
-        <Lines nodes={nodes}/>
-        <Nodes nodes={nodes} floorId={floorId} setNodes={setNodes} mouseState={mouseState} />
-      </svg>
-      <ZoomControls svgScale={svgScale} setSvgScale={setSvgScale} />
-      <HelpControls />
-    </Container>
+    <CanvasContext.Provider value={{nodes, setNodes, mouseState, setMouseState, position: svgPosition, setSvgPosition, scale: svgScale, setSvgScale, locked, setLocked, floor, setFloor, building, setBuilding, state}}>
+      <Container $svgPosition={svgPosition} $svgScale={svgScale} $origin={origin}>
+        <Menu floors={floors} buildings={buildings} />
+        <MainControls positionRef={positionRef} />
+        <svg ref={svgRef}>
+          <Background svgRef={svgRef}/>
+          <Lines />
+          <Nodes />
+        </svg>
+        <ZoomControls />
+        <HelpControls />
+      </Container>
+    </CanvasContext.Provider>
   )
 }
 
@@ -180,13 +196,7 @@ const Container = styled.div`
     width: 100%;
     height: 100%;
     touch-action: none;
-    // background-color: #6060d168;
     background-image: url("./demo_background.png");
-    /* background-color: #f2f2f2; //  */
-    /* polygon{
-      transform: translate(10px, 10px)
-      scale(${props => props.$svgScale});
-    } */
     circle, line, path{
       transform-origin: 50% 50%;
       transform: 
