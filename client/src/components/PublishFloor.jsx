@@ -12,7 +12,7 @@ const PublishFloor = ({open, setOpen, buildings}) => {
     building: "",
   })
 
-  const { nodes, setNodes } = useContext(CanvasContext)
+  const { nodes, setNodes, paths } = useContext(CanvasContext)
 
   const handleChange = (event) => {
     setBuilding(event.target.value);
@@ -57,8 +57,8 @@ const PublishFloor = ({open, setOpen, buildings}) => {
       body: JSON.stringify({
         name: floor,
         building,
-        nodes
-
+        nodes,
+        paths
       })
     }).then(res => res.json())
     .then(data => {

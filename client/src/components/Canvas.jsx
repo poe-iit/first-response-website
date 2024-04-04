@@ -19,6 +19,7 @@ const Canvas = () => {
   const [floor, setFloor] = useState(JSON.parse(localStorage.getItem("floor")) || {})
   const [buildings, setBuildings] = useState([])
   const [building, setBuilding] = useState(JSON.parse(localStorage.getItem("building")) || {})
+  const [paths, setPaths] = useState(JSON.parse(localStorage.getItem("paths")) || {})
   const state = "view"
   const [mouseState, setMouseState] = useState(localStorage.getItem("mouseState") || "default")
   
@@ -40,6 +41,10 @@ const Canvas = () => {
   useEffect(() => {
     localStorage["building"] = JSON.stringify(building)
   }, [building])
+
+  useEffect(() => {
+    localStorage["paths"] = JSON.stringify(paths)
+  }, [paths])
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_SERVER_URL}/building`, {
@@ -83,6 +88,7 @@ const Canvas = () => {
       if(!data?.error){
 
         const tempNodes = data.nodes
+        setPaths(data.paths)
 
         const paths = []
 
@@ -168,7 +174,7 @@ const Canvas = () => {
   }, [])
 
   return (
-    <CanvasContext.Provider value={{nodes, setNodes, mouseState, setMouseState, position: svgPosition, setSvgPosition, scale: svgScale, setSvgScale, locked, setLocked, floor, setFloor, building, setBuilding, state}}>
+    <CanvasContext.Provider value={{nodes, setNodes, mouseState, setMouseState, position: svgPosition, setSvgPosition, scale: svgScale, setSvgScale, locked, setLocked, floor, setFloor, building, setBuilding, state, paths, setPaths}}>
       <Container $svgPosition={svgPosition} $svgScale={svgScale} $origin={origin}>
         <Menu floors={floors} buildings={buildings} />
         <MainControls positionRef={positionRef} />

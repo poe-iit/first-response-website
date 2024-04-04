@@ -19,5 +19,7 @@ export const CanvasContext = createContext({
   setBuilding: () => {},
   nodeJoin: null,
   setNodeJoin: () => {},
-  state: "view"
+  state: "view",
+  paths: {},
+  setPaths: () => {},
 })

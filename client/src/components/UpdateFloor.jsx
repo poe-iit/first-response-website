@@ -19,7 +19,7 @@ const UpdateFloor = ({
     setBuilding(initial?.building || "")
   }, [initial])
 
-  const { nodes } = useContext(CanvasContext)
+  const { nodes, paths } = useContext(CanvasContext)
 
   const handleChange = (event) => {
     setBuilding(event.target.value);
@@ -64,7 +64,8 @@ const UpdateFloor = ({
       body: JSON.stringify({
         name: floorName,
         building,
-        nodes
+        nodes,
+        paths
       })
     }).then(res => res.json())
     .then(data => {

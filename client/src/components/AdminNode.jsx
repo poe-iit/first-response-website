@@ -3,7 +3,7 @@ import { CanvasContext } from '../hook/CanvasContext'
 
 const AdminNode = ({ id, setNodeSelected }) => {
 
-  const {scale, size, position, nodes, setNodes, mouseState, nodeJoin, setNodeJoin} = useContext(CanvasContext)
+  const {scale, size, position, nodes, setNodes, paths, setPaths, mouseState, nodeJoin, setNodeJoin} = useContext(CanvasContext)
 
   const circleRef = useRef()
   const isMoving = useRef(false)
@@ -83,6 +83,12 @@ const AdminNode = ({ id, setNodeSelected }) => {
             newNodes[nodeJoin].connections = [...new Set(newNodes[nodeJoin].connections)]
             newNodes[id].connections = [...new Set(newNodes[id].connections)]
             return newNodes
+          })
+          setPaths(prevPaths => {
+            const newPaths = {...prevPaths}
+            newPaths[`${nodeJoin}->${id}`] = "x"
+            newPaths[`${id}->${nodeJoin}`] = "y"
+            return newPaths
           })
         }
         setNodeJoin(null)

@@ -26,6 +26,7 @@ const EditCanvas = () => {
 
   const [mouseState, setMouseState] = useState(localStorage.getItem("editMouseState") || "default")
   const [nodes, setNodes] = useState(JSON.parse(localStorage.getItem("editNodes")) || {})
+  const [paths, setPaths] = useState(JSON.parse(localStorage.getItem("editPaths")) || {})
   const [initial, setInitial] = useState(JSON.parse(localStorage.getItem("initial")) || {})
   const [buildings, setBuildings] = useState([])
   const [floorName, setFloorName] = useState("")
@@ -44,6 +45,7 @@ const EditCanvas = () => {
       .then(data => {
         setInitial(data)
         setNodes(data.nodes)
+        setPaths(data.paths)
         setFloorName(data.name)
       })
       .catch(err =>{
@@ -110,6 +112,10 @@ const EditCanvas = () => {
   useEffect(() => {
     localStorage["editSvgPosition"] = JSON.stringify(svgPosition)
   }, [svgPosition])
+
+  useEffect(() => {
+    localStorage["editPaths"] = JSON.stringify(paths)
+  }, [paths])
 
   useEffect(() => {
     localStorage["editSvgScale"] = JSON.stringify(svgScale)
@@ -190,7 +196,7 @@ const EditCanvas = () => {
   }
 
   return (
-    <CanvasContext.Provider value={{nodes, setNodes, mouseState, setMouseState, position: svgPosition,  setSvgPosition, scale: svgScale, setSvgScale, size, setSize, nodeJoin, setNodeJoin, locked, setLocked, state}}>
+    <CanvasContext.Provider value={{nodes, setNodes, mouseState, setMouseState, position: svgPosition,  setSvgPosition, scale: svgScale, setSvgScale, size, setSize, nodeJoin, setNodeJoin, locked, setLocked, state, setPaths, paths}}>
       <Container $svgPosition={svgPosition} $svgScale={svgScale} $origin={origin}>
         <MainControls positionRef={positionRef} setUploadPlan={setUploadPlan}/>
         <svg ref={svgRef} onMouseDown={handleMouseDown}>
