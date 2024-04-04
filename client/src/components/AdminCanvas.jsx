@@ -23,6 +23,7 @@ const AdminCanvas = () => {
   const [mouseState, setMouseState] = useState(localStorage.getItem("adminMouseState") || "default")
   const [nodes, setNodes] = useState(JSON.parse(localStorage.getItem("adminNodes")) || {})
   const [buildings, setBuildings] = useState([])
+  const [paths, setPaths] = useState(JSON.parse(localStorage.getItem("adminPaths")) || {})
   const state = "admin"
 
   useEffect(() => {
@@ -82,6 +83,10 @@ const AdminCanvas = () => {
   useEffect(() => {
     localStorage["adminSvgScale"] = JSON.stringify(svgScale)
   }, [svgScale])
+
+  useEffect(() => {
+    localStorage["adminPaths"] = JSON.stringify(paths)
+  }, [paths])
 
   useGesture({
     onDrag: ({ down, movement: [mx, my] }) => {
@@ -158,7 +163,7 @@ const AdminCanvas = () => {
   }
 
   return (
-    <CanvasContext.Provider value={{nodes, setNodes, mouseState, setMouseState, position: svgPosition,  setSvgPosition, scale: svgScale, setSvgScale, size, setSize, nodeJoin, setNodeJoin, locked, setLocked, state}}>
+    <CanvasContext.Provider value={{nodes, setNodes, mouseState, setMouseState, position: svgPosition,  setSvgPosition, scale: svgScale, setSvgScale, size, setSize, nodeJoin, setNodeJoin, locked, setLocked, state, paths, setPaths}}>
       <Container $svgPosition={svgPosition} $svgScale={svgScale} $origin={origin}>
         <MainControls positionRef={positionRef} setUploadPlan={setUploadPlan}/>
         <svg ref={svgRef} onMouseDown={handleMouseDown}>

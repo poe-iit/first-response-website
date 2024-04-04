@@ -2,10 +2,10 @@ import { useContext, useEffect, useState } from 'react'
 import { CanvasContext } from '../hook/CanvasContext'
 
 const Lines = () => {
-  const { nodes } = useContext(CanvasContext)
+  const { nodes, paths } = useContext(CanvasContext)
   const [lines, setLines] = useState([])
-  const [paths, setPaths] = useState()
-  const [initialPaths, setInitialPaths] = useState()
+  const [shortestPaths, setShortestPaths] = useState()
+  const [initialShortestPaths, setInitialShortestPaths] = useState()
 
   // Split this component into lines and arrows
 
@@ -60,27 +60,27 @@ const Lines = () => {
         return { distances, prev };
       }
 
-      const tempPaths = {}
+      const tempShortestPaths = {}
   
       // Example usage
       for(const node in nodes){
         if(nodes[node].isExit && nodes[node].state !== "compromised"){
           const result = dijkstra(nodes, node);
-          tempPaths[node] = {
+          tempShortestPaths[node] = {
             ...result
           }
         }
       }
-      setPaths(tempPaths)
+      setShortestPaths(tempShortestPaths)
     }
   }, [nodes])
 
   useEffect(() => {
     let skip = true
-    for(const exit in initialPaths){
+    for(const exit in initialShortestPaths){
       if(!(exit in nodes) || !nodes[exit].isExit)skip = false
     }
-    if(!initialPaths)skip = false
+    if(!initialShortestPaths)skip = false
     if(skip)return
     if(nodes){
       function dijkstra(graph, startNode) {
@@ -134,39 +134,40 @@ const Lines = () => {
         return { distances, prev };
       }
 
-      const tempPaths = {}
+      const tempShortestPaths = {}
   
       // Example usage
       for(const node in nodes){
         if(nodes[node].isExit){
           const result = dijkstra(nodes, node);
-          tempPaths[node] = {
+          tempShortestPaths[node] = {
             ...result
           }
         }
       }
-      setInitialPaths(tempPaths)
+      setInitialShortestPaths(tempShortestPaths)
     }
   }, [nodes])
 
   useEffect(() => {
-    if(!paths || !initialPaths)return
+    if(!shortestPaths || !initialShortestPaths)return
     const set = new Set()
     const connections = []
+    console.log(nodes, initialShortestPaths, shortestPaths)
     for(const key in nodes){
-      if(key in paths)continue
+      if(key in shortestPaths)continue
       let distNode = [Number.MAX_SAFE_INTEGER, null]
-      for(const exit in paths){
-        if(paths[exit].distances[key] && paths[exit].distances[key] < distNode[0]){
-          distNode = [paths[exit].distances[key], paths[exit].prev[key]]
+      for(const exit in shortestPaths){
+        if(shortestPaths[exit].distances[key] && shortestPaths[exit].distances[key] < distNode[0]){
+          distNode = [shortestPaths[exit].distances[key], shortestPaths[exit].prev[key]]
         }
       }
       if(distNode[0] === Number.MAX_SAFE_INTEGER){
-        for(const exit in initialPaths){
-          console.log(exit, initialPaths, nodes)
+        for(const exit in initialShortestPaths){
+          console.log(exit, initialShortestPaths, nodes)
           if( nodes[exit].state === "compromised")continue
-          if(initialPaths[exit].distances[key] && initialPaths[exit].distances[key] < distNode[0]){
-            distNode = [initialPaths[exit].distances[key], initialPaths[exit].prev[key]]
+          if(initialShortestPaths[exit].distances[key] && initialShortestPaths[exit].distances[key] < distNode[0]){
+            distNode = [initialShortestPaths[exit].distances[key], initialShortestPaths[exit].prev[key]]
           }
         }
       }
@@ -174,25 +175,52 @@ const Lines = () => {
       if(distNode[0] === Number.MAX_SAFE_INTEGER) continue
       const nodeStart = nodes[key].ui
       const nodeEnd = nodes[distNode[1]].ui
+      const pathKey = key + "->" + distNode[1]
+      const right = Number(nodeStart.x) < Number(nodeEnd.x)
+      const top = Number(nodeStart.y) > Number(nodeEnd.y)
+      // console.log( paths[pathKey], nodeStart.ui, nodeEnd.ui)
+      if(pathKey in paths){
+        const adjustedX1 = Number(nodeEnd.x) + (right ? -5 : 5),
+              adjustedY1 = Number(nodeEnd.y) + (top ? 5 : -5),
+              adjustedX2 = Number(nodeStart.x) + (right ? 5 : -5),
+              adjustedY2 = Number(nodeStart.y) + (top ? -5 : 5)
+
+        const dir = paths[pathKey] === "x" ? ((right && top || !right && !top) ? 0 : 1) : ((top && !right || !top && right) ? 0 : 1)
+        console.log(dir, right, top)
+        connections.push(<path
+          key={pathKey+"2"}
+          id={pathKey}
+          className='admin-line'
+          stroke='black'
+          fill='transparent'
+          cursor={"pointer"}
+          d={`
+            M${nodeStart.x} ${nodeStart.y} 
+            L${paths[pathKey] === "x" ? adjustedX1 : nodeStart.x} ${paths[pathKey] === "x" ? nodeStart.y : adjustedY1}
+            A 5 5 0 0 ${dir} ${paths[pathKey] === "x" ? nodeEnd.x : adjustedX2} ${paths[pathKey] === "x" ? adjustedY2 : nodeEnd.y}
+            L${nodeEnd.x} ${nodeEnd.y}
+          `}
+        />)
+      }
       // Create a line svg to display each node connection
-      connections.push(<line
-        key={key+"-"+distNode[1]}
-        x1={nodeStart.x} 
-        y1={nodeStart.y} 
-        x2={nodeEnd.x} 
-        y2={nodeEnd.y} 
-        stroke="black"
-      />)
+      // connections.push(<line
+      //   key={key+"-"+distNode[1]}
+      //   x1={nodeStart.x} 
+      //   y1={nodeStart.y} 
+      //   x2={nodeEnd.x} 
+      //   y2={nodeEnd.y} 
+      //   stroke="black"
+      // />)
 
       // Make this better and more understandable
       // You get the position, then get the left and right by creating an arc around the line, then move the arrow forward by 6.5
-      let angle = Math.atan2(parseFloat(nodeEnd.y) - parseFloat(nodeStart.y), parseFloat(nodeEnd.x) - parseFloat(nodeStart.x))
+      let angle = paths[pathKey] === "x" ? (right ? 0 : Math.PI) : (top ? 3*Math.PI/2 : Math.PI/2)
       if(angle < 0) angle += 2*Math.PI
       angle += Math.PI
       const radius = 10
       const circleRadius = 20
       const start = [parseFloat(nodeStart.x) - (circleRadius + 6.5) * Math.cos(angle), parseFloat(nodeStart.y) - (circleRadius + 6.5) * Math.sin(angle)]
-      const right = [radius * Math.cos(angle+Math.PI/4) + parseFloat(nodeStart.x) - (circleRadius + 6.5) * Math.cos(angle), radius * Math.sin(angle+Math.PI/4) + parseFloat(nodeStart.y) - (circleRadius + 6.5) * Math.sin(angle)]
+      const rightPoint = [radius * Math.cos(angle+Math.PI/4) + parseFloat(nodeStart.x) - (circleRadius + 6.5) * Math.cos(angle), radius * Math.sin(angle+Math.PI/4) + parseFloat(nodeStart.y) - (circleRadius + 6.5) * Math.sin(angle)]
       const left = [radius * Math.cos(angle-Math.PI/4) + parseFloat(nodeStart.x) - (circleRadius + 6.5) * Math.cos(angle), radius * Math.sin(angle-Math.PI/4) + parseFloat(nodeStart.y) - (circleRadius + 6.5) * Math.sin(angle)]
       // console.log(start, left, right)
       connections.push(
@@ -201,7 +229,7 @@ const Lines = () => {
           id={key}
           stroke='black'
           fill="black"
-          d={`${"M"+start[0]} ${start[1]} ${"L"+left[0]} ${left[1]} ${"L"+right[0]} ${right[1]} Z`}
+          d={`${"M"+start[0]} ${start[1]} ${"L"+left[0]} ${left[1]} ${"L"+rightPoint[0]} ${rightPoint[1]} Z`}
         />
       )
       set.add(key+", "+distNode[1])
@@ -217,19 +245,46 @@ const Lines = () => {
           const nodeStart = nodes[key].ui
           const nodeEnd = nodes[connection].ui
           // Create a line svg to display each node connection
-          connections.push(<line
-            key={key+"-"+connection}
-            x1={nodeStart.x} 
-            y1={nodeStart.y} 
-            x2={nodeEnd.x} 
-            y2={nodeEnd.y} 
-            stroke="black"
-          />)
+          const pathKey = key + "->" + connection
+          const right = Number(nodeStart.x) < Number(nodeEnd.x)
+          const top = Number(nodeStart.y) > Number(nodeEnd.y)
+          // console.log( paths[pathKey], nodeStart.ui, nodeEnd.ui)
+          if(pathKey in paths){
+            const adjustedX1 = Number(nodeEnd.x) + (right ? -5 : 5),
+                  adjustedY1 = Number(nodeEnd.y) + (top ? 5 : -5),
+                  adjustedX2 = Number(nodeStart.x) + (right ? 5 : -5),
+                  adjustedY2 = Number(nodeStart.y) + (top ? -5 : 5)
+
+            const dir = paths[pathKey] === "x" ? ((right && top || !right && !top) ? 0 : 1) : ((top && !right || !top && right) ? 0 : 1)
+            console.log(dir, right, top)
+            connections.push(<path
+              key={pathKey+"2"}
+              id={pathKey}
+              className='admin-line'
+              stroke='black'
+              fill='transparent'
+              cursor={"pointer"}
+              d={`
+                M${nodeStart.x} ${nodeStart.y} 
+                L${paths[pathKey] === "x" ? adjustedX1 : nodeStart.x} ${paths[pathKey] === "x" ? nodeStart.y : adjustedY1}
+                A 5 5 0 0 ${dir} ${paths[pathKey] === "x" ? nodeEnd.x : adjustedX2} ${paths[pathKey] === "x" ? adjustedY2 : nodeEnd.y}
+                L${nodeEnd.x} ${nodeEnd.y}
+              `}
+            />)
+          }
+          // connections.push(<line
+          //   key={key+"-"+connection}
+          //   x1={nodeStart.x} 
+          //   y1={nodeStart.y} 
+          //   x2={nodeEnd.x} 
+          //   y2={nodeEnd.y} 
+          //   stroke="black"
+          // />)
         }
       }
     }
     setLines(connections)
-  }, [paths, initialPaths])
+  }, [shortestPaths, initialShortestPaths])
 
   return (
     <>
