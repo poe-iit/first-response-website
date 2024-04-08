@@ -130,6 +130,12 @@ function App() {
     }
   }, [userData])
 
+  useEffect(() => {
+    if(("building" in localStorage || "floor" in localStorage) && !("paths" in localStorage)){
+      localStorage.clear()
+    }
+  }, [])
+
   return (
     <AuthContext.Provider value={{ app, auth, db, user, setUser, userData, setUserData, loading, setLoading }} >
       <Container className="light">
