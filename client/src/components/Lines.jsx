@@ -44,12 +44,12 @@ const Lines = () => {
       
             // Calculate new distance
             const newDistance = distances[currentNode] + (
-              (
+              Math.abs(
                 graph[currentNode].ui.x - graph[neighbor].ui.x
-              )**2 + (
+              ) + Math.abs(
                 graph[currentNode].ui.y - graph[neighbor].ui.y
-              )**2
-            )**(1/2);
+              )
+            );
             if (newDistance < distances[neighbor]) {
               distances[neighbor] = newDistance; // Update distance
               prev[neighbor] = currentNode; // Update path
@@ -118,12 +118,12 @@ const Lines = () => {
       
             // Calculate new distance
             const newDistance = distances[currentNode] + (
-              (
+              Math.abs(
                 graph[currentNode].ui.x - graph[neighbor].ui.x
-              )**2 + (
+              ) + Math.abs(
                 graph[currentNode].ui.y - graph[neighbor].ui.y
-              )**2
-            )**(1/2);
+              )
+            );
             if (newDistance < distances[neighbor]) {
               distances[neighbor] = newDistance; // Update distance
               prev[neighbor] = currentNode; // Update path
