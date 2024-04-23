@@ -61,7 +61,7 @@ const UpdateFloor = ({
       bluePrint.name = image.updatedName || image.name
       bluePrint.position = image.updatedPosition || image.position || [0, 0]
       bluePrint.scale = image.updatedScale || image.scale
-      if(image?.updatedUrl.length){
+      if(image?.updatedUrl?.length){
         await fetch("https://api.cloudinary.com/v1_1/dkibqlalh/auto/upload", {
           method: "POST",
           headers: {
