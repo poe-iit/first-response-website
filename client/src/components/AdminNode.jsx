@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef } from 'react'
 import { CanvasContext } from '../hook/CanvasContext'
 
-const AdminNode = ({ id, setNodeSelected }) => {
+const AdminNode = ({ id, setNodeSelected, setEditingNode, setEditNode }) => {
 
   const {scale, size, position, nodes, setNodes, paths, setPaths, mouseState, nodeJoin, setNodeJoin} = useContext(CanvasContext)
 
@@ -93,12 +93,17 @@ const AdminNode = ({ id, setNodeSelected }) => {
         }
         setNodeJoin(null)
       }
-    }if(mouseState === "exit"){
+    }
+    else if(mouseState === "exit"){
       setNodes(prevNodes => {
         const newNodes = {...prevNodes}
         newNodes[id].isExit = !newNodes[id].isExit
         return newNodes
       })
+    }
+    else if(mouseState === "editNodeId"){
+      setEditNode(true)
+      setEditingNode(id)
     }
   }
 
