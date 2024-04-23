@@ -12,7 +12,7 @@ const PublishFloor = ({open, setOpen, buildings}) => {
     building: "",
   })
 
-  const { nodes, setNodes, paths } = useContext(CanvasContext)
+  const { nodes, setNodes, paths, image, setImage } = useContext(CanvasContext)
 
   const handleChange = (event) => {
     setBuilding(event.target.value);
@@ -34,7 +34,10 @@ const PublishFloor = ({open, setOpen, buildings}) => {
     // get building()
   }, [error])
 
-  const handleClick = () => {
+  useEffect(() => {
+    console.log(image)
+  }, [open])
+  const handleClick = async () => {
     const replace = {}
     if(!floor || floor.length === 0) {
       replace.floor = "Floor name is required"
@@ -42,7 +45,33 @@ const PublishFloor = ({open, setOpen, buildings}) => {
     if(!building || building.length === 0) {
       replace.building ="Building is required"
     }
-    console.log(serverURL)
+    const bluePrint = {}
+    if(Object.keys(image)?.length){
+      bluePrint.name = image.updatedName || image.name
+      bluePrint.position = image.updatedPosition || image.position || [0, 0]
+      bluePrint.scale = image.updatedScale || image.scale
+      if(image?.updatedUrl.length){
+        await fetch("https://api.cloudinary.com/v1_1/dkibqlalh/auto/upload", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            file: image.updatedUrl,
+            upload_preset: "i2k8fkqj"
+          })
+        })
+        .then(res => res.json())
+        .then(data => {
+          bluePrint.url = data.secure_url
+        })
+        .catch(err => {console.log("Error Here: ", err)
+          bluePrint.url = image.url
+        })
+      }else{
+        bluePrint.url = image.url
+      }
+    }
     setError({
       ...error,
       ...replace
@@ -58,12 +87,14 @@ const PublishFloor = ({open, setOpen, buildings}) => {
         name: floor,
         building,
         nodes,
-        paths
+        paths,
+        image: bluePrint
       })
     }).then(res => res.json())
     .then(data => {
       console.log(data)
       setNodes({})
+      setImage({})
       setOpen(false)
     }).catch(err => console.log("Error Here: ", err))
   }
