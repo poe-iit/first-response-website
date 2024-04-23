@@ -11,6 +11,8 @@ import PolylineIcon from '@mui/icons-material/Polyline';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import RoomPreferencesIcon from '@mui/icons-material/RoomPreferences';
 import PublishIcon from '@mui/icons-material/Publish';
+import EditNoteIcon from '@mui/icons-material/EditNote';
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import styled from 'styled-components';
 import { CanvasContext } from '../hook/CanvasContext';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
@@ -18,7 +20,7 @@ import { Link } from 'react-router-dom';
 
 const MainControls = ({positionRef, setUploadPlan}) => {
 
-  const {nodes, mouseState, setMouseState, setSvgPosition, setSvgScale, locked, setLocked, floor, state } = useContext(CanvasContext)
+  const {nodes, mouseState, setMouseState, setSvgPosition, setSvgScale, locked, setLocked, floor, state, setImage, image, position, scale } = useContext(CanvasContext)
 
   useEffect(() => {
     localStorage["locked"] = JSON.stringify(locked)
@@ -83,6 +85,50 @@ const MainControls = ({positionRef, setUploadPlan}) => {
         fontSize: "1.3em",
         }} data-title="Toggle Exit Node"/>
       </button>}
+      {state !== "view" && <button onClick={() => setMouseState("editNodeId")} className={mouseState === "editNodeId" ? "active" : ""} data-title="Edit Node ID">
+        <EditNoteIcon sx={{
+        fontSize: "1.3em",
+        }} data-title="Edit Node ID"/>
+      </button>}
+      {state !== "view" && ((image?.url?.length || image?.updatedUrl?.length) ?
+      <button onClick={() => setMouseState("editImage")} className={mouseState === "editImage" ? "active" : ""} data-title="Edit Image">
+        <AddPhotoAlternateIcon sx={{
+        fontSize: "1.3em",
+        }} data-title="Edit Image"/>
+      </button> :
+      <label htmlFor='upload-plan' onClick={() => setMouseState("editImage")} className={mouseState === "editImage" ? "upload-plan active" : "upload-plan"} data-title="Upload new plan">
+        <AddPhotoAlternateIcon sx={{
+          fontSize: "1.3em",
+        }} data-title="Upload new plan"/>
+        <input type='file'name='upload-plan' id='upload-plan' accept="image/*" onChange={(e) => {
+          const file = e.target.files[0]
+          console.log(file)
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            console.log("loaded", event)
+            const blobUrl = event.target.result
+            setImage(prevImage => {
+              const x = -position[0]
+              const y = -position[1]
+              const svg = document.querySelector("svg#canvas")
+              const midX = svg.clientWidth / 2
+              const midY = svg.clientHeight / 2 
+              return {
+                updatedPosition: [
+                  (x - midX + midX * scale) / scale,
+                  (y - midY + midY * scale) / scale
+                ],
+                updatedScale: 1,
+                ...prevImage,
+                updatedName: file.name,
+                updatedUrl: blobUrl,
+              }
+            })
+            // Use blobUrl here
+          }
+          if(file)reader.readAsDataURL(file)
+        }} />
+      </label>)}
       {state === "view" && <button onClick={resetNodes} data-title="Reset Nodes">
         {/* Reset all nodes */}
         <RestartAltIcon sx={{
@@ -126,7 +172,8 @@ export default MainControls
 
 const Container = styled.div`
   position: absolute;
-  left: calc(50vw - 5.9138125em);
+  left: 0;
+  transform: translateX(calc(50vw - 50%));
   top: 10px;
   display: flex;
   flex-direction: row;
@@ -136,7 +183,7 @@ const Container = styled.div`
   border-radius: 5px;
   padding: 0.2em;
   gap: 0.2em;
-  button, a{
+  button, a, label{
     font-size: 0.9em;
     outline: 0;
     border: 0;
@@ -153,6 +200,11 @@ const Container = styled.div`
     }
     &:hover{
       background-color: var(--md-sys-color-surface-container);
+    }
+  }
+  .upload-plan{
+    input{
+      display: none;
     }
   }
 `
