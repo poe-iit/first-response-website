@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import Lines from './Lines'
 import Nodes from './Nodes'
 import MainControls from './MainControls'
+import Image from './Image'
 import { useGesture } from '@use-gesture/react'
 import ZoomControls from './ZoomControls'
 import Menu from './Menu'
@@ -22,7 +23,7 @@ const Canvas = () => {
   const [paths, setPaths] = useState(JSON.parse(localStorage.getItem("paths")) || {})
   const state = "view"
   const [mouseState, setMouseState] = useState(localStorage.getItem("mouseState") || "default")
-  
+  const [image, setImage] = useState({})
   const [locked, setLocked] = useState(false)
   
   const [svgPosition, setSvgPosition] = useState(JSON.parse(localStorage.getItem("svgPosition")) || [0, 0])
@@ -89,6 +90,7 @@ const Canvas = () => {
 
         const tempNodes = data.nodes
         setPaths(data.paths)
+        setImage(data.image || {})
 
         const paths = []
 
@@ -174,12 +176,13 @@ const Canvas = () => {
   }, [])
 
   return (
-    <CanvasContext.Provider value={{nodes, setNodes, mouseState, setMouseState, position: svgPosition, setSvgPosition, scale: svgScale, setSvgScale, locked, setLocked, floor, setFloor, building, setBuilding, state, paths, setPaths}}>
+    <CanvasContext.Provider value={{nodes, setNodes, mouseState, setMouseState, position: svgPosition, setSvgPosition, scale: svgScale, setSvgScale, locked, setLocked, floor, setFloor, building, setBuilding, state, paths, setPaths, image, setImage}}>
       <Container $svgPosition={svgPosition} $svgScale={svgScale} $origin={origin}>
         <Menu floors={floors} buildings={buildings} />
         <MainControls positionRef={positionRef} />
-        <svg ref={svgRef}>
+        <svg ref={svgRef} id="canvas">
           <Background svgRef={svgRef}/>
+          <Image />
           <Lines />
           <Nodes />
         </svg>

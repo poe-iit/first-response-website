@@ -10,8 +10,10 @@ import { v4 as uuidv4 } from 'uuid'
 import AdminNodes from './AdminNodes'
 import { CanvasContext } from '../hook/CanvasContext'
 import AdminLines from './AdminLines'
-import PublishFloor from './PublishFloor'
 import UpdateFloor from './UpdateFloor'
+import EditNodeModal from './EditNodeModal'
+import Image from './Image'
+import EditImage from './EditImage'
 
 /*
 Make position, scale and size of canvas global
@@ -46,6 +48,7 @@ const EditCanvas = () => {
         setInitial(data)
         setNodes(data.nodes)
         setPaths(data.paths)
+        setImage(data.image)
         setFloorName(data.name)
       })
       .catch(err =>{
@@ -98,6 +101,11 @@ const EditCanvas = () => {
   const [origin, setOrigin] = useState([0, 0])
   
   const [nodeSelected, setNodeSelected] = useState(false)
+
+  const [editNode, setEditNode] = useState(false)
+  const [editingNode, setEditingNode] = useState(null)
+  const [image, setImage] = useState({})
+  const [editImage, setEditImage] = useState(false)
 
   useEffect(() => {
     if(!svgRef.current) return
@@ -196,10 +204,10 @@ const EditCanvas = () => {
   }
 
   return (
-    <CanvasContext.Provider value={{nodes, setNodes, mouseState, setMouseState, position: svgPosition,  setSvgPosition, scale: svgScale, setSvgScale, size, setSize, nodeJoin, setNodeJoin, locked, setLocked, state, setPaths, paths}}>
+    <CanvasContext.Provider value={{nodes, setNodes, mouseState, setMouseState, position: svgPosition,  setSvgPosition, scale: svgScale, setSvgScale, size, setSize, nodeJoin, setNodeJoin, locked, setLocked, state, setPaths, paths, image, setImage}}>
       <Container $svgPosition={svgPosition} $svgScale={svgScale} $origin={origin}>
         <MainControls positionRef={positionRef} setUploadPlan={setUploadPlan}/>
-        <svg ref={svgRef} onMouseDown={handleMouseDown}>
+        <svg ref={svgRef} onMouseDown={handleMouseDown} id="canvas">
           <defs>
             <filter id="glow">
               <feGaussianBlur stdDeviation="3.5" result="coloredBlur"/>
@@ -212,8 +220,9 @@ const EditCanvas = () => {
             </filter>
           </defs>
           <Background svgRef={svgRef}/>
+          <Image setOpen={setEditImage} />
           <AdminLines />
-          <AdminNodes setNodeSelected={setNodeSelected}/>
+          <AdminNodes setNodeSelected={setNodeSelected} setEditingNode={setEditingNode} setEditNode={setEditNode}/>
           {mouseState === "circle" && <circle
             id='newNode'
             ref={newNodeRef}
@@ -230,6 +239,8 @@ const EditCanvas = () => {
         <HelpControls />
         {/* On publish set initial nodes to {} and change publish plan to edit plan component */}
         <UpdateFloor open={uploadPlan} setOpen={setUploadPlan} buildings={buildings} floorId={params.floor} floorName={floorName} setFloorName={setFloorName} initial={initial} setInitial={setInitial}/>
+        <EditNodeModal open={editNode} setOpen={setEditNode} nodeId={editingNode} />
+        <EditImage open={editImage} setOpen={setEditImage} />
       </Container>
     </CanvasContext.Provider>
   )

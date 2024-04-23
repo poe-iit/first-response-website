@@ -10,6 +10,9 @@ import AdminNodes from './AdminNodes'
 import { CanvasContext } from '../hook/CanvasContext'
 import AdminLines from './AdminLines'
 import PublishFloor from './PublishFloor'
+import EditNodeModal from './EditNodeModal'
+import Image from './Image'
+import EditImage from './EditImage'
 
 /*
 Make position, scale and size of canvas global
@@ -24,6 +27,11 @@ const AdminCanvas = () => {
   const [nodes, setNodes] = useState(JSON.parse(localStorage.getItem("adminNodes")) || {})
   const [buildings, setBuildings] = useState([])
   const [paths, setPaths] = useState(JSON.parse(localStorage.getItem("adminPaths")) || {})
+  const [editNode, setEditNode] = useState(false)
+  const [editingNode, setEditingNode] = useState(null)
+  const [image, setImage] = useState({})
+  const [editImage, setEditImage] = useState(false)
+
   const state = "admin"
 
   useEffect(() => {
@@ -163,10 +171,10 @@ const AdminCanvas = () => {
   }
 
   return (
-    <CanvasContext.Provider value={{nodes, setNodes, mouseState, setMouseState, position: svgPosition,  setSvgPosition, scale: svgScale, setSvgScale, size, setSize, nodeJoin, setNodeJoin, locked, setLocked, state, paths, setPaths}}>
+    <CanvasContext.Provider value={{nodes, setNodes, mouseState, setMouseState, position: svgPosition,  setSvgPosition, scale: svgScale, setSvgScale, size, setSize, nodeJoin, setNodeJoin, locked, setLocked, state, paths, setPaths, image, setImage}}>
       <Container $svgPosition={svgPosition} $svgScale={svgScale} $origin={origin}>
         <MainControls positionRef={positionRef} setUploadPlan={setUploadPlan}/>
-        <svg ref={svgRef} onMouseDown={handleMouseDown}>
+        <svg ref={svgRef} onMouseDown={handleMouseDown} id="canvas">
           <defs>
             <filter id="glow">
               <feGaussianBlur stdDeviation="3.5" result="coloredBlur"/>
@@ -179,8 +187,9 @@ const AdminCanvas = () => {
             </filter>
           </defs>
           <Background svgRef={svgRef}/>
+          <Image setOpen={setEditImage} />
           <AdminLines />
-          <AdminNodes setNodeSelected={setNodeSelected}/>
+          <AdminNodes setNodeSelected={setNodeSelected} setEditingNode={setEditingNode} setEditNode={setEditNode} />
           {mouseState === "circle" && <circle
             id='newNode'
             ref={newNodeRef}
@@ -196,6 +205,8 @@ const AdminCanvas = () => {
         <ZoomControls />
         <HelpControls />
         <PublishFloor open={uploadPlan} setOpen={setUploadPlan} buildings={buildings} />
+        <EditNodeModal open={editNode} setOpen={setEditNode} nodeId={editingNode} />
+        <EditImage open={editImage} setOpen={setEditImage} />
       </Container>
     </CanvasContext.Provider>
   )
@@ -214,7 +225,7 @@ const Container = styled.div`
     height: 100%;
     touch-action: none;
     background-image: url("./demo_background.png");
-    circle, line, path{
+    circle, line, path, image{
       transform-origin: 50% 50%;
       transform: 
       translate(${props => props.$svgPosition[0]}px, ${props => props.$svgPosition[1]}px)
