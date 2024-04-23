@@ -10,7 +10,7 @@ const Image = ({ setOpen }) => {
     const publicId = imageUrl.split("/").pop().split(".")[0]
     console.log(publicId)
     const { signature, timestamp } = await fetch(`${import.meta.env.VITE_SERVER_URL}/generate_signature?public_id=${publicId}`).then(res => res.json())
-    
+
     await fetch("https://api.cloudinary.com/v1_1/dkibqlalh/image/destroy", {
       method: "POST",
       headers: {
@@ -56,6 +56,7 @@ const Image = ({ setOpen }) => {
   return (
     <image {...imagePosition} href={image.updatedUrl?.length ? image.updatedUrl : image.url} onClick={handleClick} transform={`scale(${isNaN(image?.updatedScale) ? image?.scale || 1 : image?.updatedScale})`} data-title={image.updatedName || image.name} style={{
       cursor: mouseState === "editImage" ? "pointer" : "default",
+      transformOrigin: "50% 50%",
       transform: `\
       translate(${position[0]}px, ${position[1]}px) scale(${(!isNaN(image?.updatedScale) || !isNaN(image.scale)) ? (isNaN(image?.updatedScale) ? image?.scale || 1 : image?.updatedScale) * scale : scale})`
     }}/>
