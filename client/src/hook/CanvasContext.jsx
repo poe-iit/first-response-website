@@ -22,4 +22,6 @@ export const CanvasContext = createContext({
   state: "view",
   paths: {},
   setPaths: () => {},
+  image: {},
+  setImage: () => {},
 })
