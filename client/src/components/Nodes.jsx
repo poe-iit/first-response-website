@@ -3,11 +3,11 @@ import { CanvasContext } from "../hook/CanvasContext"
 
 const Nodes = () => {
 
-  const { nodes, floor, mouseState } = useContext(CanvasContext)
+  const { nodes, floor, mouseStateRef } = useContext(CanvasContext)
 
   const alarmNode = (nodeId) => {
     if(!floor?.id)return
-    if(mouseState !== "danger")return
+    if(mouseStateRef.current !== "danger")return
     const tempNodes = JSON.parse(JSON.stringify(nodes))
     tempNodes[nodeId].state = tempNodes[nodeId].state === "compromised" ? "safe" : "compromised"
 

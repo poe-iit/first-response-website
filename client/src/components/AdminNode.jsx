@@ -3,13 +3,13 @@ import { CanvasContext } from '../hook/CanvasContext'
 
 const AdminNode = ({ id, setNodeSelected, setEditingNode, setEditNode }) => {
 
-  const {scale, size, position, nodes, setNodes, setPaths, mouseState, nodeJoin, setNodeJoin} = useContext(CanvasContext)
+  const {scale, size, position, nodes, setNodes, setPaths, mouseStateRef, nodeJoin, setNodeJoin} = useContext(CanvasContext)
 
   const circleRef = useRef()
   const isMoving = useRef(false)
 
   const handlePointerDown = (e) => {
-    if(mouseState === "delete"){
+    if(mouseStateRef.current === "delete"){
       setNodes(prevNodes => {
         const newNodes = {...prevNodes}
         for(const key of newNodes[id].connections){
@@ -20,8 +20,8 @@ const AdminNode = ({ id, setNodeSelected, setEditingNode, setEditNode }) => {
       })
       return
     }    
-    if(mouseState === "default")setNodeSelected(id)
-    isMoving.current = (mouseState === "default") ? true : false
+    if(mouseStateRef.current === "default")setNodeSelected(id)
+    isMoving.current = (mouseStateRef.current === "default") ? true : false
   }
 
   
@@ -70,7 +70,7 @@ const AdminNode = ({ id, setNodeSelected, setEditingNode, setEditNode }) => {
 
   const handleClick = (e) => {
     console.log(nodes)
-    if(mouseState === "line"){
+    if(mouseStateRef.current === "line"){
       if(!nodeJoin)setNodeJoin(id)
       else {
         if(nodeJoin !== id){
@@ -99,14 +99,14 @@ const AdminNode = ({ id, setNodeSelected, setEditingNode, setEditNode }) => {
         setNodeJoin(null)
       }
     }
-    else if(mouseState === "exit"){
+    else if(mouseStateRef.current === "exit"){
       setNodes(prevNodes => {
         const newNodes = {...prevNodes}
         newNodes[id].isExit = !newNodes[id].isExit
         return newNodes
       })
     }
-    else if(mouseState === "editNodeId"){
+    else if(mouseStateRef.current === "editNodeId"){
       setEditNode(true)
       setEditingNode(id)
     }

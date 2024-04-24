@@ -3,7 +3,7 @@ import { CanvasContext } from '../hook/CanvasContext'
 
 const Image = ({ setOpen }) => {
 
-  const { image, mouseState, position, scale, setImage } = useContext(CanvasContext)
+  const { image, mouseStateRef, position, scale, setImage } = useContext(CanvasContext)
   const [imagePosition, setImagePosition] = useState({x: 0, y: 0})
 
   const deleteImage = async (imageUrl) => {
@@ -28,13 +28,13 @@ const Image = ({ setOpen }) => {
   }
   // console.log(image)
   const handleClick = async () => {
-    console.log("Clicked", mouseState)
-    if(mouseState === "editImage"){
+    console.log("Clicked", mouseStateRef.current)
+    if(mouseStateRef.current === "editImage"){
       setOpen(true)
       console.log("clicked")
       return
     }
-    if(mouseState === "delete"){
+    if(mouseStateRef.current === "delete"){
       if(image?.url?.length)await deleteImage(image.url)
       setImage({})
       return
@@ -55,7 +55,7 @@ const Image = ({ setOpen }) => {
   }, [position, image, scale])
   return (
     <image {...imagePosition} href={image.updatedUrl?.length ? image.updatedUrl : image.url} onClick={handleClick} transform={`scale(${isNaN(image?.updatedScale) ? image?.scale || 1 : image?.updatedScale})`} data-title={image.updatedName || image.name} style={{
-      cursor: mouseState === "editImage" ? "pointer" : "default",
+      cursor: mouseStateRef.current === "editImage" ? "pointer" : "default",
       transformOrigin: "50% 50%",
       transform: `\
       translate(${position[0]}px, ${position[1]}px) scale(${(!isNaN(image?.updatedScale) || !isNaN(image.scale)) ? (isNaN(image?.updatedScale) ? image?.scale || 1 : image?.updatedScale) * scale : scale})`

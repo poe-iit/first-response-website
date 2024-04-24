@@ -23,6 +23,7 @@ const Canvas = () => {
   const [paths, setPaths] = useState(JSON.parse(localStorage.getItem("paths")) || {})
   const state = "view"
   const [mouseState, setMouseState] = useState(localStorage.getItem("mouseState") || "default")
+  const mouseStateRef = useRef(mouseState)
   const [image, setImage] = useState({})
   const [locked, setLocked] = useState(false)
   
@@ -33,6 +34,7 @@ const Canvas = () => {
 
   useEffect(() => {
     localStorage["mouseState"] = mouseState
+    mouseStateRef.current = mouseState
   }, [mouseState])
 
   useEffect(() => {
@@ -176,7 +178,7 @@ const Canvas = () => {
   }, [])
 
   return (
-    <CanvasContext.Provider value={{nodes, setNodes, mouseState, setMouseState, position: svgPosition, setSvgPosition, scale: svgScale, setSvgScale, locked, setLocked, floor, setFloor, building, setBuilding, state, paths, setPaths, image, setImage}}>
+    <CanvasContext.Provider value={{nodes, setNodes, mouseState, setMouseState, mouseStateRef, position: svgPosition, setSvgPosition, scale: svgScale, setSvgScale, locked, setLocked, floor, setFloor, building, setBuilding, state, paths, setPaths, image, setImage}}>
       <Container $svgPosition={svgPosition} $svgScale={svgScale} $origin={origin}>
         <Menu floors={floors} buildings={buildings} />
         <MainControls positionRef={positionRef} />

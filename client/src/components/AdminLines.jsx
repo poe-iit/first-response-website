@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react'
 import { CanvasContext } from '../hook/CanvasContext'
 
 const AdminLines = () => {
-  const { nodes, setNodes, mouseState, setPaths, paths } = useContext(CanvasContext)
+  const { nodes, setNodes, mouseStateRef, setPaths, paths } = useContext(CanvasContext)
   const [lines, setLines] = useState([])
   
   useEffect(() => {
@@ -16,7 +16,7 @@ const AdminLines = () => {
     const handleClick = (e) => {
       const [id, key] = e.target.dataset.key.split("->")
       // console.log(id, key)
-      if(mouseState === "delete"){
+      if(mouseStateRef.current === "delete"){
         // console.log(id, key, "deleting line")
         setNodes(prevNodes => {
           const newNodes = {...prevNodes}

@@ -20,7 +20,7 @@ import { Link } from 'react-router-dom';
 
 const MainControls = ({positionRef, setUploadPlan}) => {
 
-  const {nodes, mouseState, setMouseState, setSvgPosition, setSvgScale, locked, setLocked, floor, state, setImage, image, position, scale } = useContext(CanvasContext)
+  const {nodes, mouseStateRef, setMouseState, setSvgPosition, setSvgScale, locked, setLocked, floor, state, setImage, image, position, scale } = useContext(CanvasContext)
 
   useEffect(() => {
     localStorage["locked"] = JSON.stringify(locked)
@@ -57,46 +57,46 @@ const MainControls = ({positionRef, setUploadPlan}) => {
           }} data-title="Lock Canvas"/>
         }
       </button>
-      <button onClick={() => setMouseState("default")} className={mouseState === "default" ? "active" : ""} data-title="Move Items">
+      <button onClick={() => setMouseState("default")} className={mouseStateRef.current === "default" ? "active" : ""} data-title="Move Items">
         <Cursor data-title="Move Items"/>
       </button>
-      {state === "view" && <button onClick={() => setMouseState("danger")} className={mouseState === "danger" ? "active" : ""} data-title="Set Node On Fire">
+      {state === "view" && <button onClick={() => setMouseState("danger")} className={mouseStateRef.current === "danger" ? "active" : ""} data-title="Set Node On Fire">
         <WhatshotIcon sx={{
         fontSize: "1.3em",
       }} data-title="Set Node On Fire"/>
       </button>}
-     {state !== "view" && <button onClick={() => setMouseState("circle")} className={mouseState === "circle" ? "active" : ""} data-title="Create Node">
+     {state !== "view" && <button onClick={() => setMouseState("circle")} className={mouseStateRef.current === "circle" ? "active" : ""} data-title="Create Node">
         <AddCircleOutlineIcon sx={{
         fontSize: "1.3em",
       }} data-title="Create Node"/>
       </button>}
-      {state !== "view" && <button onClick={() => setMouseState("line")} className={mouseState === "line" ? "active" : ""} data-title="Link Nodes">
+      {state !== "view" && <button onClick={() => setMouseState("line")} className={mouseStateRef.current === "line" ? "active" : ""} data-title="Link Nodes">
         <PolylineIcon sx={{
         fontSize: "1.3em",
       }} data-title="Link Nodes"/>
       </button>}
-      {state !== "view" && <button onClick={() => setMouseState("delete")} className={mouseState === "delete" ? "active" : ""} data-title="Delete Node/Line">
+      {state !== "view" && <button onClick={() => setMouseState("delete")} className={mouseStateRef.current === "delete" ? "active" : ""} data-title="Delete Node/Line">
         <DeleteOutlineIcon sx={{
         fontSize: "1.3em",
       }} data-title="Delete Node/Line"/>
       </button>}
-      {state !== "view" && <button onClick={() => setMouseState("exit")} className={mouseState === "exit" ? "active" : ""} data-title="Toggle Exit Node">
+      {state !== "view" && <button onClick={() => setMouseState("exit")} className={mouseStateRef.current === "exit" ? "active" : ""} data-title="Toggle Exit Node">
         <RoomPreferencesIcon sx={{
         fontSize: "1.3em",
         }} data-title="Toggle Exit Node"/>
       </button>}
-      {state !== "view" && <button onClick={() => setMouseState("editNodeId")} className={mouseState === "editNodeId" ? "active" : ""} data-title="Edit Node ID">
+      {state !== "view" && <button onClick={() => setMouseState("editNodeId")} className={mouseStateRef.current === "editNodeId" ? "active" : ""} data-title="Edit Node ID">
         <EditNoteIcon sx={{
         fontSize: "1.3em",
         }} data-title="Edit Node ID"/>
       </button>}
       {state !== "view" && ((image?.url?.length || image?.updatedUrl?.length) ?
-      <button onClick={() => setMouseState("editImage")} className={mouseState === "editImage" ? "active" : ""} data-title="Edit Image">
+      <button onClick={() => setMouseState("editImage")} className={mouseStateRef.current === "editImage" ? "active" : ""} data-title="Edit Image">
         <AddPhotoAlternateIcon sx={{
         fontSize: "1.3em",
         }} data-title="Edit Image"/>
       </button> :
-      <label htmlFor='upload-plan' onClick={() => setMouseState("editImage")} className={mouseState === "editImage" ? "upload-plan active" : "upload-plan"} data-title="Upload new plan">
+      <label htmlFor='upload-plan' onClick={() => setMouseState("editImage")} className={mouseStateRef.current === "editImage" ? "upload-plan active" : "upload-plan"} data-title="Upload new plan">
         <AddPhotoAlternateIcon sx={{
           fontSize: "1.3em",
         }} data-title="Upload new plan"/>

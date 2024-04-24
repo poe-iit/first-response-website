@@ -24,6 +24,7 @@ const AdminCanvas = () => {
 
 
   const [mouseState, setMouseState] = useState(localStorage.getItem("adminMouseState") || "default")
+  const mouseStateRef = useRef(mouseState)
   const [nodes, setNodes] = useState(JSON.parse(localStorage.getItem("adminNodes")) || {})
   const [buildings, setBuildings] = useState([])
   const [paths, setPaths] = useState(JSON.parse(localStorage.getItem("adminPaths")) || {})
@@ -50,6 +51,7 @@ const AdminCanvas = () => {
 
   useEffect(() => {
     localStorage["adminMouseState"] = mouseState
+    mouseStateRef.current = mouseState
   }, [mouseState])
 
   useEffect(() => {
@@ -150,7 +152,7 @@ const AdminCanvas = () => {
   }, [svgPosition, svgScale, size])
 
   const handleMouseDown = (e) => {
-    if(mouseState === "circle"){
+    if(mouseStateRef.current === "circle"){
       const x = (e.clientX - svgPosition[0])
       const y = (e.clientY - svgPosition[1])
       const midX = svgRef.current.clientWidth / 2
@@ -171,7 +173,7 @@ const AdminCanvas = () => {
   }
 
   return (
-    <CanvasContext.Provider value={{nodes, setNodes, mouseState, setMouseState, position: svgPosition,  setSvgPosition, scale: svgScale, setSvgScale, size, setSize, nodeJoin, setNodeJoin, locked, setLocked, state, paths, setPaths, image, setImage}}>
+    <CanvasContext.Provider value={{nodes, setNodes, mouseState, setMouseState, mouseStateRef, position: svgPosition,  setSvgPosition, scale: svgScale, setSvgScale, size, setSize, nodeJoin, setNodeJoin, locked, setLocked, state, paths, setPaths, image, setImage}}>
       <Container $svgPosition={svgPosition} $svgScale={svgScale} $origin={origin}>
         <MainControls positionRef={positionRef} setUploadPlan={setUploadPlan}/>
         <svg ref={svgRef} onMouseDown={handleMouseDown} id="canvas">
@@ -190,7 +192,7 @@ const AdminCanvas = () => {
           <Image setOpen={setEditImage} />
           <AdminLines />
           <AdminNodes setNodeSelected={setNodeSelected} setEditingNode={setEditingNode} setEditNode={setEditNode} />
-          {mouseState === "circle" && <circle
+          {mouseStateRef.current === "circle" && <circle
             id='newNode'
             ref={newNodeRef}
             cx={svgPosition[0]}

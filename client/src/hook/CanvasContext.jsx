@@ -5,6 +5,7 @@ export const CanvasContext = createContext({
   setNodes: () => {},
   mouseState: "",
   setMouseState: () => {},
+  mouseStateRef: null,
   position: [0, 0],
   setSvgPosition: () => {},
   scale: 1,
