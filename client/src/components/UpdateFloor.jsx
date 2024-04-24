@@ -19,7 +19,7 @@ const UpdateFloor = ({
     setBuilding(initial?.building || "")
   }, [initial])
 
-  const { nodes, paths, image, setImage } = useContext(CanvasContext)
+  const { nodes, paths, image, setImage, setPaths, setNodes } = useContext(CanvasContext)
 
   const handleChange = (event) => {
     setBuilding(event.target.value);
@@ -101,6 +101,8 @@ const UpdateFloor = ({
       setInitial({})
       setOpen(false)
       setImage({})
+      setPaths({})
+      setNodes({})
       navigate("/sandbox")
     }).catch(err => console.log("Error Here: ", err))
   }
