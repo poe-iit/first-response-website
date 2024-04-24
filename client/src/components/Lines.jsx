@@ -9,55 +9,30 @@ const Lines = () => {
 
   // Split this component into lines and arrows
 
+  function getDistance (start, end) {
+    return Math.abs(start.x - end.x) + Math.abs(start.y - end.y)
+  }
+  
+
   useEffect(() => {
     if(nodes){
       function dijkstra(graph, startNode) {
-        const distances = {}; // Store distances from the start node
-        const prev = {}; // Store the previous node in the optimal path
-        const visited = new Set(); // Track visited nodes
-        // This part was commentted but just make dijkstra run twice and then add arrows to the nodes without arrows
-        // Probably run it at the first load so you can always reference it since it won't change
-        // You'll have the initial that points to the closest and this algorithm that points to the closest that is safe, and if a node is compromised or stuck you use the initial
-        for(const node in nodes){
-          if(nodes[node].state === "compromised")visited.add(node)
-        }
-        // Make compromised nodes of lower priority
-        // But howww
-        const queue = []; // Priority queue of nodes to visit
-      
-        // Initialize distances and queue
-        for (let node in graph) {
-          distances[node] = Infinity;
-          queue.push(node);
-          prev[node] = null;
-        }
-        distances[startNode] = 0;
-      
-        while (queue.length !== 0) {
-          // Sort queue by distance (simple priority queue)
-          queue.sort((a, b) => distances[a] - distances[b]);
-          const currentNode = queue.shift(); // Node with the shortest distance
-          visited.add(currentNode);
-      
-          for (let neighbor of graph[currentNode].connections) {
-            if (visited.has(neighbor)) continue; // Skip visited nodes
-      
-            // Calculate new distance
-            const newDistance = distances[currentNode] + (
-              Math.abs(
-                graph[currentNode].ui.x - graph[neighbor].ui.x
-              ) + Math.abs(
-                graph[currentNode].ui.y - graph[neighbor].ui.y
-              )
-            );
-            if (newDistance < distances[neighbor]) {
-              distances[neighbor] = newDistance; // Update distance
-              prev[neighbor] = currentNode; // Update path
+        const queue = [startNode]
+        const dist = {[startNode]: 0}, path = {[startNode]: null}
+        while(queue.length){
+          const node = queue.pop()
+          if(graph[node].state === "compromised")continue
+          for(const neighbor of graph[node].connections){
+            if(!(neighbor in dist) || dist[neighbor] > getDistance(graph[neighbor].ui, graph[node].ui) + dist[node]){
+              dist[neighbor] = getDistance(graph[neighbor].ui, graph[node].ui) + dist[node]
+              path[neighbor] = node
+              queue.push(neighbor)
+              queue.sort((a,b) => dist[b] - dist[a])
             }
           }
         }
       
-        return { distances, prev };
+        return { distances: dist, prev: path };
       }
 
       const tempShortestPaths = {}
@@ -84,54 +59,21 @@ const Lines = () => {
     if(skip)return
     if(nodes){
       function dijkstra(graph, startNode) {
-        const distances = {}; // Store distances from the start node
-        const prev = {}; // Store the previous node in the optimal path
-        const visited = new Set(); // Track visited nodes
-        // This part was commentted but just make dijkstra run twice and then add arrows to the nodes without arrows
-        // Probably run it at the first load so you can always reference it since it won't change
-        // You'll have the initial that points to the closest and this algorithm that points to the closest that is safe, and if a node is compromised or stuck you use the initial
-
-        // for(const node in nodes){
-        //   if(nodes[node].state === "compromised")visited.add(node)
-        // }
-
-        // Make compromised nodes of lower priority
-        // But howww
-        const queue = []; // Priority queue of nodes to visit
-      
-        // Initialize distances and queue
-        for (let node in graph) {
-          distances[node] = Infinity;
-          queue.push(node);
-          prev[node] = null;
-        }
-        distances[startNode] = 0;
-      
-        while (queue.length !== 0) {
-          // Sort queue by distance (simple priority queue)
-          queue.sort((a, b) => distances[a] - distances[b]);
-          const currentNode = queue.shift(); // Node with the shortest distance
-          visited.add(currentNode);
-      
-          for (let neighbor of graph[currentNode].connections) {
-            if (visited.has(neighbor)) continue; // Skip visited nodes
-      
-            // Calculate new distance
-            const newDistance = distances[currentNode] + (
-              Math.abs(
-                graph[currentNode].ui.x - graph[neighbor].ui.x
-              ) + Math.abs(
-                graph[currentNode].ui.y - graph[neighbor].ui.y
-              )
-            );
-            if (newDistance < distances[neighbor]) {
-              distances[neighbor] = newDistance; // Update distance
-              prev[neighbor] = currentNode; // Update path
+        const queue = [startNode]
+        const dist = {[startNode]: 0}, path = {[startNode]: null}
+        while(queue.length){
+          const node = queue.pop()
+          for(const neighbor of graph[node].connections){
+            if(!(neighbor in dist) || dist[neighbor] > getDistance(graph[neighbor].ui, graph[node].ui) + dist[node]){
+              dist[neighbor] = getDistance(graph[neighbor].ui, graph[node].ui) + dist[node]
+              path[neighbor] = node
+              queue.push(neighbor)
+              queue.sort((a,b) => dist[b] - dist[a])
             }
           }
         }
       
-        return { distances, prev };
+        return { distances: dist, prev: path };
       }
 
       const tempShortestPaths = {}
@@ -153,7 +95,6 @@ const Lines = () => {
     if(!shortestPaths || !initialShortestPaths)return
     const set = new Set()
     const connections = []
-    console.log(nodes, initialShortestPaths, shortestPaths)
     for(const key in nodes){
       if(key in shortestPaths)continue
       let distNode = [Number.MAX_SAFE_INTEGER, null]
@@ -164,7 +105,6 @@ const Lines = () => {
       }
       if(distNode[0] === Number.MAX_SAFE_INTEGER){
         for(const exit in initialShortestPaths){
-          console.log(exit, initialShortestPaths, nodes)
           if( nodes[exit].state === "compromised")continue
           if(initialShortestPaths[exit].distances[key] && initialShortestPaths[exit].distances[key] < distNode[0]){
             distNode = [initialShortestPaths[exit].distances[key], initialShortestPaths[exit].prev[key]]
@@ -186,7 +126,6 @@ const Lines = () => {
               adjustedY2 = Number(nodeStart.y) + (top ? -5 : 5)
 
         const dir = paths[pathKey] === "x" ? ((right && top || !right && !top) ? 0 : 1) : ((top && !right || !top && right) ? 0 : 1)
-        console.log(dir, right, top)
         connections.push(<path
           key={pathKey+"2"}
           id={pathKey}
@@ -256,7 +195,6 @@ const Lines = () => {
                   adjustedY2 = Number(nodeStart.y) + (top ? -5 : 5)
 
             const dir = paths[pathKey] === "x" ? ((right && top || !right && !top) ? 0 : 1) : ((top && !right || !top && right) ? 0 : 1)
-            console.log(dir, right, top)
             connections.push(<path
               key={pathKey+"2"}
               id={pathKey}
