@@ -12,7 +12,7 @@ const PublishFloor = ({open, setOpen, buildings}) => {
     building: "",
   })
 
-  const { nodes, setNodes, paths, image, setImage } = useContext(CanvasContext)
+  const { nodes, paths, image, setNodes, setPaths, setImage } = useContext(CanvasContext)
 
   const handleChange = (event) => {
     setBuilding(event.target.value);
@@ -95,6 +95,7 @@ const PublishFloor = ({open, setOpen, buildings}) => {
       console.log(data)
       setNodes({})
       setImage({})
+      setPaths({})
       setOpen(false)
     }).catch(err => console.log("Error Here: ", err))
   }
