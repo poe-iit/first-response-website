@@ -15,8 +15,9 @@ const AdminLines = () => {
 
     const handleClick = (e) => {
       const [id, key] = e.target.dataset.key.split("->")
+      // console.log(id, key)
       if(mouseState === "delete"){
-        console.log(id, key, "deleting line")
+        // console.log(id, key, "deleting line")
         setNodes(prevNodes => {
           const newNodes = {...prevNodes}
           newNodes[key].connections = newNodes[key].connections.filter(con => con !== id)
@@ -31,7 +32,7 @@ const AdminLines = () => {
         })
         return
       }
-      console.log(e)
+      // console.log(e)
     }
 
     const switchPath = (id1, id2) => {
@@ -60,7 +61,7 @@ const AdminLines = () => {
         const key = id1 + "->" + id2
         const right = Number(nodeStart.ui.x) < Number(nodeEnd.ui.x)
         const top = Number(nodeStart.ui.y) > Number(nodeEnd.ui.y)
-        console.log(id1, id2, paths[key], nodeStart.ui, nodeEnd.ui)
+        // console.log(id1, id2, paths[key], nodeStart.ui, nodeEnd.ui)
         if(key in paths){
           const adjustedX1 = Number(nodeEnd.ui.x) + (right ? -5 : 5),
                 adjustedY1 = Number(nodeEnd.ui.y) + (top ? 5 : -5),
@@ -68,7 +69,7 @@ const AdminLines = () => {
                 adjustedY2 = Number(nodeStart.ui.y) + (top ? -5 : 5)
 
           const dir = paths[key] === "x" ? ((right && top || !right && !top) ? 0 : 1) : ((top && !right || !top && right) ? 0 : 1)
-          console.log(dir, right, top)
+          // console.log(dir, right, top)
           connections.push(<path
             key={key}
             id={key}
@@ -133,7 +134,7 @@ const AdminLines = () => {
     }
 
     setLines(connections)
-    console.log(paths)
+    // console.log(paths)
   }, [nodes, paths])
 
   return (
