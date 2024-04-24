@@ -3,7 +3,7 @@ import { CanvasContext } from '../hook/CanvasContext'
 
 const AdminNode = ({ id, setNodeSelected, setEditingNode, setEditNode }) => {
 
-  const {scale, size, position, nodes, setNodes, paths, setPaths, mouseState, nodeJoin, setNodeJoin} = useContext(CanvasContext)
+  const {scale, size, position, nodes, setNodes, setPaths, mouseState, nodeJoin, setNodeJoin} = useContext(CanvasContext)
 
   const circleRef = useRef()
   const isMoving = useRef(false)
@@ -86,8 +86,13 @@ const AdminNode = ({ id, setNodeSelected, setEditingNode, setEditNode }) => {
           })
           setPaths(prevPaths => {
             const newPaths = {...prevPaths}
-            newPaths[`${nodeJoin}->${id}`] = "x"
-            newPaths[`${id}->${nodeJoin}`] = "y"
+            if(Math.abs(nodes[nodeJoin].ui.x - nodes[id].ui.x) <= 15){
+              newPaths[`${nodeJoin}->${id}`] = "y"
+            }else newPaths[`${nodeJoin}->${id}`] = "x"
+            if(Math.abs(nodes[nodeJoin].ui.y - nodes[id].ui.y) <= 15)newPaths[`${id}->${nodeJoin}`] = "x"
+            else newPaths[`${id}->${nodeJoin}`] = "y"
+            // newPaths[`${nodeJoin}->${id}`] ="x"
+            // newPaths[`${id}->${nodeJoin}`] = "y"
             return newPaths
           })
         }
