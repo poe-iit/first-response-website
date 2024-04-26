@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import MenuIcon from "@mui/icons-material/Menu"
 import MenuOpenIcon from '@mui/icons-material/MenuOpen';
@@ -6,15 +6,25 @@ import CloseIcon from '@mui/icons-material/Close'
 import { FormControl, InputLabel, MenuItem, Select } from '@mui/material'
 import { CanvasContext } from '../hook/CanvasContext';
 
+const serverURL = import.meta.env.VITE_SERVER_URL
 const Menu = ({ floors, buildings }) => {
 
   const {floor, setFloor, building, setBuilding} = useContext(CanvasContext)
+  console.log(floor)
+  const [defaultFloor, setDefaultFloor] = useState("")
   const [toggle, setToggle] = useState(false)
   const handleModal = (e) => {
     setToggle(!toggle)
   }
   const handleInteraction = (e) => {
     e.stopPropagation()
+  }
+  const getDefaultFloor = () => {
+    fetch(`${serverURL}/floor/default`)
+    .then(res => res.json())
+    .then((floor) => {
+      setDefaultFloor(floor)
+    })
   }
 
   const handleChange = (event) => {
@@ -24,6 +34,25 @@ const Menu = ({ floors, buildings }) => {
   const handleBuilding = (event) => {
     setBuilding(buildings.find(curr => curr._id === event.target.value))
   }
+
+  const updateDefaultFloor = (floorId) => {
+    fetch(`${serverURL}/floor/default/${floorId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    }).then(res => {
+      setDefaultFloor(floorId)
+    })
+  }
+
+  useEffect(() => {
+    getDefaultFloor()
+  }, [])
+
+  useEffect(() => {
+    console.log(defaultFloor)
+  }, [defaultFloor])
 
   return (
     <Container>
@@ -74,6 +103,11 @@ const Menu = ({ floors, buildings }) => {
                 }
               </Select>
             </FormControl>
+            <button disabled={defaultFloor == floor?.id } onClick={() => {
+              if(!floor?.id || defaultFloor == floor?.id)return
+              updateDefaultFloor(floor?.id)
+            }}
+            >Update to Default Floor</button>
           </div>
         </div>
       </div>
@@ -95,17 +129,28 @@ const Container = styled.div`
   border: 0.1px solid var(--md-sys-color-surface-dim);
   border-radius: 5px;
   button{
-    outline: 0;
+    width: 100%;
+    border-radius: 100px;
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
     border: 0;
-    border-radius: 5px;
-    background-color: transparent;
-    color: var(--md-sys-color-on-surface);
+    padding: 0.6em;
     display: flex;
     align-items: center;
-    padding: 0.3em 0.5em;
+    justify-content: center;
     cursor: pointer;
+    line-height: 24px;
+    font-size: 0.85em;
+    font-weight: 500;
     &:hover{
-      background-color: var(--md-sys-color-surface-container);
+      filter: brightness(90%);
+    }
+    &:disabled{
+      user-select: none;
+      opacity : 0.5;
+      &:hover{
+       filter: brightness(100%);
+      }
     }
   }
   .modal{
