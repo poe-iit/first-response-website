@@ -47,6 +47,8 @@ function App() {
   useEffect(() => {
     if(user) {
       setIsAuth(true)
+    }else{
+      setIsAuth(false)
     }
   }, [user])
 
