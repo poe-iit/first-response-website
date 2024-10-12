@@ -149,10 +149,11 @@ const Container = styled.div`
         flex-direction: row;
         align-items: center;
         gap: 0.5rem;
-        border: 1px solid #ccc;
-        border-radius: 0.25rem;
+        border: 1px solid #e6e6e6;
+        border-radius: 1rem;
         padding: 0.5rem;
         cursor: text;
+        background-color: #e6e6e6;
         &:focus-within{
           border-color: #000000;
         }
@@ -164,13 +165,14 @@ const Container = styled.div`
           border: none;
           height: 100%;
           outline: none;
+          background-color: inherit;
         }
       }
       button{
         border: none;
         background-color: #000000; // TODO: Make colors variables
         cursor: pointer;
-        border-radius: 0.25rem;
+        border-radius: 1rem;
         font-size: 1em;
         padding: 0.5rem;
         color: #ffffff;
