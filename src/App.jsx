@@ -1,9 +1,10 @@
 import { Routes, Route } from 'react-router-dom'
 import styled from 'styled-components'
+import Home from './pages/Home'
 import Login from './pages/Login'
+import Prototype1 from './pages/Prototype1'
 import { AuthContext } from './hooks/AuthContext'
 import { useState, useEffect } from 'react'
-import Home from './pages/Home'
 
 function App() {
 
@@ -58,6 +59,7 @@ function App() {
         <Routes>
           <Route path="/" exact element={<Home />} />
           <Route path="/login" exact element={<Login />} />
+          <Route path="/prototype1" exact element={ <Prototype1 />} />
         </Routes>
       </Container>
     </AuthContext.Provider>
