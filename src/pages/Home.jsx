@@ -2,6 +2,7 @@ import styled from "styled-components"
 import { Link } from "react-router-dom"
 import { useContext } from "react"
 import { AuthContext } from "../hooks/AuthContext"
+import Navbar from '../components/navbar'; // Import the navbar
 
 const Home = () => {
   const { setUser } = useContext(AuthContext)
@@ -33,6 +34,8 @@ const Home = () => {
   }
   return (
     <Container>
+      <Navbar />
+      <MainContent>
       <h1>Home</h1>
       <p>There isn't anything here currently so I'll use it as a sort of list of created pages</p>
       <ul>
@@ -53,10 +56,18 @@ const Home = () => {
       <button onClick={(e) => {
         logout()
       }}>Logout</button>
+      </MainContent>
     </Container>
   )
 }
 
-const Container = styled.div``
+const Container = styled.div`
+  display: flex;
+`;
+
+const MainContent = styled.div`
+  flex-grow: 1;
+  padding: 30px;
+`;
 
 export default Home
