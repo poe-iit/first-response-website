@@ -34,7 +34,7 @@ const Home = () => {
   }
   return (
     <Container>
-      <Navbar />
+      <Navbar username="New user"/>
       <MainContent>
       <h1>Home</h1>
       <p>There isn't anything here currently so I'll use it as a sort of list of created pages</p>

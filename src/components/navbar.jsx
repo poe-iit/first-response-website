@@ -12,7 +12,7 @@ import NodeIcon from '../assets/icons/image 9.svg';
 
 const drawerWidth = 238;
 
-const Navbar = () => {
+const Navbar = ({username}) => {
 
     const { setUser } = useContext(AuthContext)
     const logout = () => {
@@ -59,7 +59,7 @@ const Navbar = () => {
       <Box sx={{ display: 'flex', alignItems: 'center', padding: 2 }}>
       <img src={ProfileIcon} width='51px' height='51px'/>
         <Box sx={{ ml: 2 }}>
-          <Typography variant="h6">John Doe</Typography>
+          <Typography variant="h6">{username}</Typography>
           <Button onClick={logout} endIcon={<ExitToAppIcon />}>
             Log out
           </Button>
