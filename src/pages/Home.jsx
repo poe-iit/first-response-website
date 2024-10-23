@@ -27,7 +27,6 @@ const Home = () => {
     ).then(
       res => {
         setUser(null)
-        console.log(res)
       }
     ) 
   }
