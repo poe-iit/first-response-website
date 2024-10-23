@@ -11,7 +11,6 @@ const Node = ({ state, setNodes, nodeData, setPrevSelectedNode, prevSelectedNode
   const handleClick = (e) => {
     switch(state){
       case "create":
-        console.log("create")
         break
       case "connect":
         if(prevSelectedNode === null)setPrevSelectedNode(nodeData)
@@ -39,7 +38,6 @@ const Node = ({ state, setNodes, nodeData, setPrevSelectedNode, prevSelectedNode
           setConnections([...connections, invisibleNode])
           setPrevSelectedNode(null)
         }
-        console.log("connect")
         break
       case "delete":
         if("id" in nodeData){
@@ -66,11 +64,9 @@ const Node = ({ state, setNodes, nodeData, setPrevSelectedNode, prevSelectedNode
           setConnections(connections => connections.filter(connection => connection.connectedNodes[0].name !== nodeData.name && connection.connectedNodes[1].name !== nodeData.name))
           setNodes(nodes => nodes.filter(node => node.name !== nodeData.name))
         }
-
-        console.log("delete")
         break
       default:
-        console.log("default")
+        break
     }
   }
   return (
