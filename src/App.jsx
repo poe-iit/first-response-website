@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Prototype1 from './pages/Prototype1'
+import Logs from "./pages/Logs"
 import { AuthContext } from './hooks/AuthContext'
 import { useState, useEffect } from 'react'
 
@@ -36,7 +37,6 @@ function App() {
         res => res.json()
       ).then(
         res => {
-          console.log(res)
           if(res?.data?.validateSession){
             setUser(res.data.validateSession)
           }
@@ -60,6 +60,7 @@ function App() {
           <Route path="/" exact element={<Home />} />
           <Route path="/login" exact element={<Login />} />
           <Route path="/prototype1" exact element={ <Prototype1 />} />
+          <Route path="/logs" exact element={ <Logs />} />
         </Routes>
       </Container>
     </AuthContext.Provider>
