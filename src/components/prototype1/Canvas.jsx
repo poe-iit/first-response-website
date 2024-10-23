@@ -36,7 +36,6 @@ const Canvas = ({ state }) => {
   const handleClick = (e) => {
     switch(state){
       case "create":
-        console.log("create")
         const node = {
           name: generateUniqueId(),
           state: "safe",
@@ -133,7 +132,6 @@ const Canvas = ({ state }) => {
           res => res.json()
         ).then(
           res => {
-            console.log(res)
             if("updateFloorPlan" in res?.data){
               setNodes([])
               setConnections([])
@@ -151,11 +149,9 @@ const Canvas = ({ state }) => {
             console.log(JSON.stringify(err))
           }
         )
-
-        console.log("upload")
         break
       default:
-        console.log("default")
+        break
     }
   }
 
@@ -205,7 +201,6 @@ const Canvas = ({ state }) => {
       res => res.json()
     ).then(
       res => {
-        console.log(res)
         if("getFloorPlan" in res?.data){
           setNodes(res.data.getFloorPlan.nodes)
           setConnections(res.data.getFloorPlan.invisibleNodes)
@@ -220,17 +215,9 @@ const Canvas = ({ state }) => {
   }
 
   useEffect(() => {
-    console.log(connections)
-  }, [connections])
-
-  useEffect(() => {
     getFloorPlan("660e5641660cb8aa1184bf24")
-    console.log("Restarted yay")
   }, [])
 
-  useEffect(() => {
-    console.log(nodes)
-  }, [nodes])
   return (
     <Container onClick={handleClick}>
       {nodes.map(
