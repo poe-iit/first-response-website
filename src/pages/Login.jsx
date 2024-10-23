@@ -5,6 +5,8 @@ import LoginErrorModal from '../components/LoginErrorModal'
 import loginIcon from '../assets/login-icon.svg'
 import userIcon from '../assets/user-icon.svg'
 import lockIcon from '../assets/lock-icon.svg'
+import passwordHidden from "../assets/password-hidden.svg"
+import passwordShown from "../assets/password-shown.svg"
 import styled from 'styled-components'
 
 const Login = () => {
@@ -13,6 +15,7 @@ const Login = () => {
   const [password, setPassword] = useState('')
   const [showModal, setShowModal] = useState(false)
   const [showBanner, setShowBanner] = useState(false)
+  const [passwordIsHidden, setPasswordIsHidden] = useState(true)
   const { setUser,isAuth } = useContext(AuthContext)
   const navigate = useNavigate()
   const handleSubmit = (e) => {
@@ -41,7 +44,6 @@ const Login = () => {
       res => res.json()
     ).then(
       res => {
-        console.log(res)
         if(!res?.data?.loginUser){
           setLoginCount(loginCount + 1)
         }else{
@@ -61,6 +63,10 @@ const Login = () => {
   const handlePasswordChange = (e) => {
     setPassword(e.target.value)
     handleInputChange(e)
+  }
+  const handlePasswordToggle = () => {
+    if(password.length === 0)return
+    setPasswordIsHidden(!passwordIsHidden)
   }
 
   useEffect(() => {
@@ -95,7 +101,12 @@ const Login = () => {
           </label>
           <label htmlFor="password">
             <img src={lockIcon} alt="Lock icon" />
-            <input type="password" id="password" name="password" placeholder="Password" autoComplete="current-password" aria-label="Password" required onInput={handlePasswordChange} />
+            <input type={passwordIsHidden ? "password" : "text"} id="password" name="password" placeholder="Password" autoComplete="current-password" aria-label="Password" required onInput={handlePasswordChange} />
+            {
+              passwordIsHidden ? 
+              <img src={passwordShown} alt="Password Shown" onClick={handlePasswordToggle} className={password?.length ? "" : "blur"} /> :
+              <img src={passwordHidden} alt="Password Hidden" onClick={handlePasswordToggle} className={password?.length ? "" : "blur"}/>
+            } 
           </label>
           <button type='submit'>Login</button>
         </form>
@@ -159,6 +170,9 @@ const Container = styled.div`
         }
         img{
           cursor: default;
+          &.blur{
+            opacity: 0.5;
+          }
         }
         input{
           width: 100%;
