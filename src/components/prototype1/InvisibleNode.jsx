@@ -7,7 +7,6 @@ const getLineData = (x1, y1, x2, y2) => {
   const length = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
   const angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
 
-  // console.log(length, angle, x1, y1, x2, y2)
   return {
     length,
     angle
@@ -36,12 +35,11 @@ const InvisibleNode = ({ state, connectionData, connections, setConnections }) =
             const tempNode = invisibleNode.connectedNodes[0]
             invisibleNode.connectedNodes[0] = invisibleNode.connectedNodes[1]
             invisibleNode.connectedNodes[1] = tempNode
-            invisibleNode.operation = "update"
+            if(invisibleNode?.id)invisibleNode.operation = "update"
             break
           }
         }
         setConnections(tempConnections)
-        console.log("update")
         break
       case "delete":
         for(let i = 0; i < tempConnections.length; i++){
@@ -55,10 +53,9 @@ const InvisibleNode = ({ state, connectionData, connections, setConnections }) =
           }
         }
         setConnections(tempConnections)
-        console.log("delete")
         break
       default:
-        console.log("default")
+        break
     }
   }
   return (
