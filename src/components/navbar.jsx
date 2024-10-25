@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Drawer, List, ListItem, ListItemIcon, ListItemText, Box, Avatar, Typography, Button, Divider } from '@mui/material';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { useContext } from 'react';
@@ -13,7 +13,7 @@ import NodeIcon from '../assets/icons/image 9.svg';
 const drawerWidth = 238;
 
 const Navbar = ({username}) => {
-
+    const location = useLocation();
     const { setUser } = useContext(AuthContext)
     const logout = () => {
       const query = `
@@ -67,23 +67,43 @@ const Navbar = ({username}) => {
       </Box>
       <Divider />
       <List>
-        <ListItem button component={Link} to="/overview">
+        <ListItem button component={Link} to="/overview" >
           <ListItemIcon>
             <img src={SystemsOverviewIcon} width='48px' height='48px'/>
           </ListItemIcon>
-          <ListItemText primary="System Overview" />
+          <ListItemText 
+            primary={
+              <Typography variant="body1" sx={{ fontWeight: location.pathname === "/overview" ? 'bold' : 'normal' }}>
+                System Overview
+              </Typography>
+            }/>
         </ListItem>
         <ListItem button component={Link} to="/logs">
           <ListItemIcon><img src={LogIcon} width='48px' height='48px'/></ListItemIcon>
-          <ListItemText primary="Log System" />
+          <ListItemText 
+          primary={
+            <Typography variant="body1" sx={{ fontWeight: location.pathname === "/logs" ? 'bold' : 'normal' }}>
+              Log System
+            </Typography>
+          }/>
         </ListItem>
         <ListItem button component={Link} to="/account-management">
           <ListItemIcon><img src={AccountIcon} width='48px' height='48px'/></ListItemIcon>
-          <ListItemText primary="Account/Groups Management" />
+          <ListItemText 
+          primary={
+            <Typography variant="body1" sx={{ fontWeight: location.pathname === "/account-management" ? 'bold' : 'normal' }}>
+              Account/Groups Management
+            </Typography>
+          }/>
         </ListItem>
         <ListItem button component={Link} to="/node-configuration">
           <ListItemIcon><img src={NodeIcon} width='48px' height='48px'/></ListItemIcon>
-          <ListItemText primary="Node Configuration" />
+          <ListItemText 
+          primary={
+            <Typography variant="body1" sx={{ fontWeight: location.pathname === "/node-configuration" ? 'bold' : 'normal' }}>
+              Node Configuration
+            </Typography>
+          } />
         </ListItem>
       </List>
     </Drawer>
