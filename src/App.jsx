@@ -6,7 +6,6 @@ import Prototype1 from './pages/Prototype1'
 import Logs from "./pages/Logs"
 import { AuthContext } from './hooks/AuthContext'
 import { useState, useEffect } from 'react'
-import Dashboard from './pages/Dashboard'
 import Buildings from './pages/Buildings'
 import Floor from './pages/Floor'
 import NewFloor from './pages/NewFloor'
@@ -66,7 +65,6 @@ function App() {
           <Route path="/login" exact element={<Login />} />
           <Route path="/prototype1" exact element={ <Prototype1 />} />
           <Route path="/logs" exact element={ <Logs />} />
-          <Route path="/dashboard" exact element={ <Dashboard />} />
           <Route path="/buildings" exact element={ <Buildings />} />
           <Route path="/building/:buildingId/new" exact element={ <NewFloor />} />
           <Route path="/floor/:id" exact element={ <Floor />} />
