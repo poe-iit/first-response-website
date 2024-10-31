@@ -65,7 +65,7 @@ const Logs = () => {
       res => res.json()
     ).then(
       res => {
-        if(res?.data && "getLogs" in res.data){
+        if(res?.data?.getLogs){
           setLogs(res.data.getLogs?.logs || [])
           setTotalCount(res.data.getLogs.totalCount)
         }
@@ -124,7 +124,7 @@ const Logs = () => {
       </div>
       <div className='log-container'>
         <div className='log-header'>
-          <p className='status'>Status</p>
+          <p className='status'>Signal Type</p>
           <p className='date'>Date {<button onClick={handleDateSort}>{date === 1 ? "Desc" : "Asc"}</button>}</p>
           <p className='log'>Log</p>
         </div>
