@@ -2,7 +2,7 @@ import { Stage, Layer } from "react-konva"
 import { useContext, useEffect, useRef, useState } from "react"
 import Node from "./Node";
 import InvisibleNode from "./InvisibleNode";
-import ConnectedLines from "./connectedLines";
+import ConnectedLines from "./ConnectedLines";
 import Background from "./Background";
 import FollowNode from "./FollowNode";
 import { CanvasContext } from "../hooks/CanvasContext";
