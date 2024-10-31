@@ -84,7 +84,7 @@ const formatMessage = (message) => {
   }
 
   // Push the remaining text after the last match
-  if (lastIndex < message.length) {
+  if (lastIndex < message?.length) {
     parts.push(message.slice(lastIndex))
   }
 
