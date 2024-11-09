@@ -46,6 +46,16 @@ const Home = () => {
           <p>This page is to test out the new node creation api</p>
           <br />
         </li>
+        <li>
+          <Link to="/logs">Logs</Link>
+          <p>This is the log page where the logs are displayed</p>
+          <br />
+        </li>
+        <li>
+          <Link to="/buildings">Buildings</Link>
+          <p>This is the building page where the buildings are displayed</p>
+          <br />
+        </li>
       </ul>
 
       <p>Here's the logout button</p>

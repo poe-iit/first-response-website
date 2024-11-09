@@ -94,7 +94,7 @@ const CanvasNavbar = ({ modulesAllowed }) => {
       {
         modules.has("default") ?
         <button 
-          onClick={() => setState("default")} 
+          onClick={() => setState(state === "default" ? "" : "default")} 
           className={state === "default" ? "active" : ""}
         >
           <img id="default-icon" src={cursor} alt="Set default"/>
@@ -118,7 +118,7 @@ const CanvasNavbar = ({ modulesAllowed }) => {
       {
         modules.has("create") ?
         <button 
-          onClick={() => setState("create")}
+          onClick={() => setState(state === "create" ? "" : "create")}
           className={state === "create" ? "active" : ""}
         >
           <AddCircleOutlineIcon 
@@ -133,7 +133,7 @@ const CanvasNavbar = ({ modulesAllowed }) => {
       {
         modules.has("connect") ? 
         <button 
-          onClick={() => setState("connect")}
+          onClick={() => setState(state === "connect" ? "" : "connect")}
           className={state === "connect" ? "active" : ""}
         >
           <PolylineIcon 
@@ -148,7 +148,7 @@ const CanvasNavbar = ({ modulesAllowed }) => {
       {
         modules.has("delete") ? 
         <button
-          onClick={() => setState("delete")}
+          onClick={() => setState(state === "delete" ? "" : "delete")}
           className={state === "delete" ? "active" : ""}
         >
           <DeleteOutlineIcon
@@ -180,7 +180,7 @@ const CanvasNavbar = ({ modulesAllowed }) => {
       {
         modules.has("update") ? 
         <button
-          onClick={() => setState("update")}
+          onClick={() => setState(state === "update" ? "" : "update")}
           className={state === "update" ? "active" : ""}
         >
           <EditNoteIcon
