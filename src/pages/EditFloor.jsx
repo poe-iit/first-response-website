@@ -10,7 +10,7 @@ import UpdateNodeData from "../components/UpdateNodeData"
 const EditFloor = () => {
   const { id } = useParams()
   const stageRef = useRef()
-  const [state, setState] = useState("default")
+  const [state, setState] = useState("")
   const [nodes, setNodes] = useState(new Map())
   const [connections, setConnections] = useState([])
   const [prevSelectedNode, setPrevSelectedNode] = useState(null)

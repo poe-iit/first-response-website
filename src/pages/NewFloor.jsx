@@ -8,7 +8,7 @@ import UpdateNodeData from "../components/UpdateNodeData"
 
 const NewFloor = () => {
   const stageRef = useRef()
-  const [state, setState] = useState("default")
+  const [state, setState] = useState("")
   const [nodes, setNodes] = useState(new Map())
   const [connections, setConnections] = useState([])
   const [prevSelectedNode, setPrevSelectedNode] = useState(null)
