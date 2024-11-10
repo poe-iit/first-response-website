@@ -18,7 +18,7 @@ const Floor = () => {
   const [canvasIsDraggable, setCanvasIsDraggable] = useState(true)
   const [upload, setUpload] = useState(false)
   const [updateNode, setUpdateNode] = useState()
-
+  const [nodeStates, setNodeStates] = useState(new Map())
   
   const getFloorPlan = (floorId) => {
     const query = `
@@ -93,7 +93,7 @@ const Floor = () => {
 
   return (
     <Container>
-      <CanvasContext.Provider value={{stageRef, floorId, setFloorId, state, setState, nodes, setNodes, connections, setConnections, prevSelectedNode, setPrevSelectedNode, canvasIsDraggable, setCanvasIsDraggable, upload, setUpload, updateNode, setUpdateNode  }}>
+      <CanvasContext.Provider value={{stageRef, floorId, setFloorId, state, setState, nodes, setNodes, connections, setConnections, prevSelectedNode, setPrevSelectedNode, canvasIsDraggable, setCanvasIsDraggable, upload, setUpload, updateNode, setUpdateNode, nodeStates, setNodeStates  }}>
         <Canvas />
         <CanvasNavbar modulesAllowed={[
           "lock",
