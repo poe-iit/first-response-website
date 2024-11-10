@@ -6,6 +6,7 @@ import ConnectedLines from "./ConnectedLines";
 import Background from "./Background";
 import FollowNode from "./FollowNode";
 import { CanvasContext } from "../hooks/CanvasContext";
+import Arrows from "./Arrows";
 
 function generateUniqueId() {
   return 'id-' + Date.now() + '-' + Math.random().toString(36).slice(2, 11);
@@ -125,6 +126,12 @@ const Canvas = ({ edit }) => {
             />
           )
         }
+      </Layer>
+      <Layer>
+        <Arrows 
+          nodes={nodes}
+          connections={connections}
+        />
       </Layer>
       {state === "create" ? <Layer>
         <FollowNode />
