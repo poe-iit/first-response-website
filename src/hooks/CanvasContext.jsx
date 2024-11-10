@@ -17,5 +17,7 @@ export const CanvasContext = createContext({
   upload: false,
   setUpload: () => {},
   updateNode: undefined,
-  setUpdateNode: () => {}
+  setUpdateNode: () => {},
+  nodeStates: new Map(),
+  setNodeStates: () => {}
 })

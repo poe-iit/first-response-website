@@ -5,7 +5,7 @@ import { CanvasContext } from '../hooks/CanvasContext'
 const Node = ({
   nodeData
 }) => {
-  const { state, nodes, setNodes, stageRef, prevSelectedNode, setPrevSelectedNode, connections, setConnections, setUpdateNode} = useContext(CanvasContext)
+  const { state, nodes, setNodes, stageRef, prevSelectedNode, setPrevSelectedNode, connections, setConnections, setUpdateNode, nodeStates} = useContext(CanvasContext)
   // Things that could be in useContext or gloabl config
   //circleRadius, prevSelectedNode, setPrevSelectedNode, setConnections, connections, setNodes, state, stageRef
   const circleRadius = 20
@@ -154,9 +154,9 @@ const Node = ({
       x={nodeData.ui.x}
       y={nodeData.ui.y}
       fill={
-        nodeData.state === "compromised" ? 
-        "red": nodeData.isExit ? 
-        "blue": "black"
+        nodeStates.get(nodeData.name) === "compromised" ? 
+        "#e63946": nodeData.isExit ? 
+        "#4caf50": nodeStates.get(nodeData.name) === "stuck" ? "#ff8800": "#0277bd"
       }
       radius={circleRadius}
       onClick={handleClick}
