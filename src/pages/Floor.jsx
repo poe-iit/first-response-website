@@ -7,6 +7,10 @@ import Upload from '../components/Upload'
 import CanvasNavbar from "../components/CanvasNavbar"
 import UpdateNodeData from "../components/UpdateNodeData"
 
+const generateRandomId = () => {
+  return Math.random().toString(36).substring(2, 9);
+}
+
 const Floor = () => {
   const { id } = useParams()
   const stageRef = useRef()
@@ -19,6 +23,8 @@ const Floor = () => {
   const [upload, setUpload] = useState(false)
   const [updateNode, setUpdateNode] = useState()
   const [nodeStates, setNodeStates] = useState(new Map())
+
+  console.log(id)
   
   const getFloorPlan = (floorId) => {
     const query = `
@@ -35,16 +41,10 @@ const Floor = () => {
               x
               y
             }
-          }
-          invisibleNodes {
-            id
-            connectedNodes {
+            connections {
               id
               name
-              ui {
-                x
-                y
-              }
+              direction
             }
           }
         }
@@ -66,13 +66,14 @@ const Floor = () => {
       res => res.json()
     ).then(
       res => {
-        console.log(res.data)
+        console.log(res)
         if(res?.data?.getFloorPlan){
           const nodes = res.data.getFloorPlan.nodes
           const mappedNodes = new Map()
-          for(const node of nodes)mappedNodes.set(node.name, node)
+          for(const node of nodes){
+            if(node?.name)mappedNodes.set(node.name, node)
+          }
           setNodes(mappedNodes)
-          setConnections(res.data.getFloorPlan.invisibleNodes)
           setPrevSelectedNode(null)
         }
       }
@@ -81,15 +82,64 @@ const Floor = () => {
         console.log(err)
       }
     )
+
+    const websocket = new WebSocket(`${import.meta.env.VITE_SERVER_URI}`, "graphql-transport-ws")
+    const subscription = `
+      subscription{
+        floorUpdate(id: "${floorId}") {
+          id
+          name
+          nodes {
+            id
+            name
+            state
+            isExit
+            ui {
+              x
+              y
+            }
+            connections {
+              id
+              name
+              direction
+            }
+          }
+        }
+      }
+    `
+
+    websocket.onopen = () => {
+      websocket.send(JSON.stringify({
+        "type": "connection_init"
+      }))
+      const id = generateRandomId()
+      console.log(id)
+      websocket.send(JSON.stringify({
+        "id": id,
+        "type": "subscribe",
+        "payload": {
+          "query": subscription
+        }
+      }))
+    }
+    websocket.onmessage = (event) => {
+      const data = JSON.parse(event.data)
+      console.log(data)
+      if(data?.payload?.data?.floorUpdate){
+        const nodes = data.payload.data.floorUpdate.nodes
+        const mappedNodes = new Map()
+        for(const node of nodes){
+          if(node?.name)mappedNodes.set(node.name, node)
+        }
+        setNodes(mappedNodes)
+        setPrevSelectedNode(null)
+      }
+    }
   }
 
   useEffect(() => {
     getFloorPlan(id)
   }, [])
-
-  useEffect(() => {
-    console.log(connections)
-  }, [connections])
 
   return (
     <Container>
