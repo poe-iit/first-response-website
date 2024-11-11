@@ -6,7 +6,7 @@ const getDistance = (pos1, pos2) => {
   return Math.abs(pos1.x - pos2.x) + Math.abs(pos1.y - pos2.y)
 }
 const Arrows = () => {
-  const { nodes, connections, setNodeStates, nodeStates }  = useContext(CanvasContext)
+  const { nodes, setNodeStates, nodeStates }  = useContext(CanvasContext)
   const [paths, setPaths] = useState(new Map())
   const [neighbors, setNeighbors] = useState(new Map())
   const dijkstra = (node_map, paths, startNodeName, ignoreCompromised = false) => {
@@ -24,7 +24,9 @@ const Arrows = () => {
       const currentNode = node_map.get(currentNodeName)
       for(const connection of paths?.get(currentNodeName)?.keys()){
         if(ignoreCompromised && node_map.get(connection).state === "compromised")continue
-        const distance = distances[currentNodeName] + getDistance(currentNode.ui, node_map.get(connection).ui)
+        const neighborNode = node_map.get(connection)
+        if(neighborNode.operation === "delete")continue
+        const distance = distances[currentNodeName] + getDistance(currentNode.ui, neighborNode.ui)
         if(distance < distances[connection]){
           distances[connection] = distance
           previousNodes[connection] = currentNodeName
@@ -38,7 +40,7 @@ const Arrows = () => {
   const getSafestPath = (node_map, paths) => {
     const exits = [], nodeStates = new Map()
     for(const node of node_map.values()){
-      if(node.isExit && node.state !== "compromised")exits.push(node.name)
+      if(node.isExit && node.state !== "compromised" && node?.operation !== "delete")exits.push(node.name)
     }
     const neighbor = new Map(), distance = {}
     for(const exit of exits){
@@ -74,17 +76,21 @@ const Arrows = () => {
   }
   useEffect(() => {
     const paths = new Map()
-    for(const connection of connections){
-      const firstNode = connection.connectedNodes[0]
-      const secondNode = connection.connectedNodes[1]
-      if(!paths.has(firstNode.name))paths.set(firstNode.name, new Map())
-      if(!paths.has(secondNode.name))paths.set(secondNode.name, new Map())
-      paths.get(firstNode.name).set(secondNode.name, "yx")
-      paths.get(secondNode.name).set(firstNode.name, "xy")
+    for(const node of nodes.values()){
+      paths.set(node.name, new Map())
+      for(const connection of node.connections){
+        if(connection.direction === "")continue
+        const connectedNode = nodes.get(connection.name)
+        if(!connectedNode)continue
+        if(!paths.has(node.name))paths.set(node.name, new Map())
+        if(!paths.has(connectedNode.name))paths.set(connectedNode.name, new Map())
+        paths.get(node.name).set(connectedNode.name, connection.direction)
+        paths.get(connectedNode.name).set(node.name, connection.direction === "xy" ? "yx" : "xy")
+      }
     }
     setPaths(paths)
-    getSafestPath(nodes, paths, connections)
-  }, [nodes, connections])
+    getSafestPath(nodes, paths)
+  }, [nodes])
   return (
     <>
       {
@@ -93,6 +99,7 @@ const Arrows = () => {
           if(!closestNode || !node)return null
           let rotation = 0
           const path = paths.get(node).get(closestNode)
+          if(!nodes.has(node) || !nodes.has(closestNode))return null
           if(path === "xy"){
             if(nodes.get(node).ui.x > nodes.get(closestNode).ui.x){
               rotation = 90
