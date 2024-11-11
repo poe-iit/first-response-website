@@ -19,7 +19,6 @@ const EditFloor = () => {
   const [upload, setUpload] = useState(false)
   const [updateNode, setUpdateNode] = useState()
   const [nodeStates, setNodeStates] = useState(new Map())
-
   
   const getFloorPlan = (floorId) => {
     const query = `
@@ -36,16 +35,10 @@ const EditFloor = () => {
               x
               y
             }
-          }
-          invisibleNodes {
-            id
-            connectedNodes {
+            connections {
               id
               name
-              ui {
-                x
-                y
-              }
+              direction
             }
           }
         }
@@ -67,12 +60,12 @@ const EditFloor = () => {
       res => res.json()
     ).then(
       res => {
+        console.log(res)
         if(res?.data?.getFloorPlan){
           const nodes = res.data.getFloorPlan.nodes
           const mappedNodes = new Map()
           for(const node of nodes)mappedNodes.set(node.name, node)
           setNodes(mappedNodes)
-          setConnections(res.data.getFloorPlan.invisibleNodes)
           setPrevSelectedNode(null)
         }
       }
