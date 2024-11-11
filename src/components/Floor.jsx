@@ -6,7 +6,7 @@ const Floor = ({name, id, setBuildings}) => {
   const deleteFloor = () => {
     const query =`
       mutation{
-        updateFloor(updateFloorInput: {id: "${id}", isDeleted: true}){
+        createFloor(createFloorInput: {id: "${id}", name: "${name}", isDeleted: true}){
           name
         }
       }
