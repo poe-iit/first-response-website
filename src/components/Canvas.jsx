@@ -13,7 +13,7 @@ function generateUniqueId() {
 }
 
 const Canvas = ({ edit }) => {
-  const { stageRef, state, nodes, setNodes, connections, canvasIsDraggable} = useContext(CanvasContext)
+  const { stageRef, state, nodes, setNodes, canvasIsDraggable} = useContext(CanvasContext)
 
   const createNode = (x, y) => {
     const defaultName = generateUniqueId()
@@ -25,7 +25,8 @@ const Canvas = ({ edit }) => {
         x,
         y
       },
-      operation: "create"
+      operation: "create",
+      connections: []
     }
     setNodes(prevState => {
       const clonedMap = new Map([...prevState])
@@ -80,9 +81,6 @@ const Canvas = ({ edit }) => {
     console.log(nodes)
   }, [nodes])
   useEffect(() => {
-    console.log(connections)
-  }, [connections])
-  useEffect(() => {
     console.log(stageRef.current)
     setTimeout
     window.addEventListener("resize", handleResize)
@@ -99,21 +97,43 @@ const Canvas = ({ edit }) => {
       </Layer>
       <Layer>
         {
-          connections.map(
-            (connection, key) => <ConnectedLines 
-              key={key}
-              connectionData={connection}
-            />
+          [...nodes].map(
+            ([_, node], key) => {
+              const invisibleLines = []
+              for(const connection of node.connections){
+                if(connection?.direction === "xy"){
+                  invisibleLines.push(
+                    <ConnectedLines
+                      key={node.name + "-" + connection.name}
+                      firstNodeName={connection.name}
+                      secondNodeName={node.name}
+                    />
+                  )
+                }
+              }
+              return invisibleLines
+            }
           )
         }
       </Layer>
       {edit ? <Layer>
         {
-          connections.map(
-            (connection, key) => <InvisibleNode 
-              key={key}
-              connectionData={connection}
-            />
+          [...nodes].map(
+            ([_, node], key) => {
+              const invisibleNodes = []
+              for(const connection of node.connections){
+                if(connection?.direction === "xy"){
+                  invisibleNodes.push(
+                    <InvisibleNode
+                      key={node.name + "-" + connection.name}
+                      firstNodeName={connection.name}
+                      secondNodeName={node.name}
+                    />
+                  )
+                }
+              }
+              return invisibleNodes
+            }
           )
         }
       </Layer> : <></>}
@@ -128,14 +148,9 @@ const Canvas = ({ edit }) => {
         }
       </Layer>
       <Layer>
-        <Arrows 
-          nodes={nodes}
-          connections={connections}
-        />
+        <Arrows />
+        {state === "create" ? <FollowNode /> : <></>}
       </Layer>
-      {state === "create" ? <Layer>
-        <FollowNode />
-      </Layer> : <></>}
     </Stage>
   )
 }
