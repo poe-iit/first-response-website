@@ -6,7 +6,7 @@ import Checkbox from '@mui/material/Checkbox';
 
 // Create a way to update the floor name when the Stage is clicked (if there's time)
 const UpdateNodeData = () => {
-  const { nodes, setNodes, setConnections, updateNode, setUpdateNode } = useContext(CanvasContext)
+  const { nodes, setNodes, updateNode, setUpdateNode } = useContext(CanvasContext)
   const [node, setNode] = useState()
   const [ nodeData, setNodeData ] = useState()
   const updateNodeName = (e) => {
@@ -23,6 +23,7 @@ const UpdateNodeData = () => {
     setNode(prevNode => {
       const nodeCopy = {...prevNode}
       nodeCopy.isExit = !nodeCopy.isExit
+      nodeCopy.operation = "update"
       return nodeCopy
     })
   }
@@ -35,20 +36,29 @@ const UpdateNodeData = () => {
     if(!node?.name?.length)return
     // Add errors here too
     if(node.name !== nodeData.name && nodes.has(node.name))return
-    setConnections(prevState => {
-      const newArray = []
-      for(const connection of prevState){
-        for(const connectedNode of connection.connectedNodes){
-          if(connectedNode.name === nodeData.name)connectedNode.name = node.name
-        }
-        newArray.push(connection)
-      }
-      return newArray
-    })
     setNodes(prevState => {
-      const nodesCopy = new Map(prevState)
-      nodesCopy.delete(nodeData.name)
-      nodesCopy.set(node.name, node)
+      const nodesCopy = new Map([...prevState])
+      if(nodeData.name !== node.name){
+        const currentNode = nodesCopy.get(nodeData.name)
+        currentNode.name = node.name
+        currentNode.operation = "update"
+        console.log(nodeData.name, node.name)
+        nodesCopy.delete(nodeData.name)
+        nodesCopy.set(node.name, currentNode)
+        const connections = nodesCopy.get(node.name).connections
+        for(const neighbor of connections){
+          for(const connection of nodesCopy.get(neighbor.name).connections){
+            if(connection.name === nodeData.name)connection.name = node.name
+          }
+        }
+      }
+      if(nodeData.isExit !== node.isExit){
+        const currentNode = nodesCopy.get(node.name)
+        currentNode.isExit = node.isExit
+        currentNode.operation = "update"
+        nodesCopy.set(node.name, currentNode)
+      }
+      console.log(nodesCopy, nodesCopy.size)
       return nodesCopy
     })
     setUpdateNode()
@@ -56,13 +66,13 @@ const UpdateNodeData = () => {
   // Add error handling, like "node name can not be empty"
   useEffect(() => {
     if(nodes.has(updateNode)){
-      setNode(nodes.get(updateNode))
-      setNodeData(nodes.get(updateNode))
+      setNode({...nodes.get(updateNode)})
+      setNodeData({...nodes.get(updateNode)})
     }
   }, [])
 
   return (node &&
-    <Container onClick={handleClick}>
+    <Container onClick={() => setUpdateNode()}>
       <div onClick={e => e.stopPropagation()}>
         <h1>Update Node Data</h1>
         <TextField id="outlined-basic" label="Node Name" variant="outlined" defaultValue={node?.name || ""} onInput={updateNodeName} placeholder={nodeData?.name || ""}/>
