@@ -22,6 +22,10 @@ import UpdateNodeData from "../components/UpdateNodeData"
   oppurtunity for race conditions and stale data
 */
 
+const generateRandomId = () => {
+  return Math.random().toString(36).substring(2, 9);
+}
+
 const EditFloor = () => {
   const { id } = useParams()
   const stageRef = useRef()
