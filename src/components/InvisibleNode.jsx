@@ -3,54 +3,87 @@ import { Circle } from 'react-konva'
 import { CanvasContext } from '../hooks/CanvasContext'
 
 const InvisibleNode = ({
-  connectionData
+  firstNodeName,
+  secondNodeName
 }) => {
-  const { state, nodes, connections, setConnections } = useContext(CanvasContext)
+  const { state, nodes, setNodes } = useContext(CanvasContext)
   const invisibleNodeRadius = 10
-  const { connectedNodes } = connectionData
-  const firstNode = nodes.get(connectedNodes[0].name)
-  const secondNode = nodes.get(connectedNodes[1].name)
-
-  const switchConnection = (connections) => {
-    for(const invisibleNode of connections){
-      if(invisibleNode?.operation === "hide" || invisibleNode?.operation === "delete")continue
-      if(invisibleNode.connectedNodes[0].name === firstNode.name && invisibleNode.connectedNodes[1].name === secondNode.name){
-        const tempNode = invisibleNode.connectedNodes[0]
-        invisibleNode.connectedNodes[0] = invisibleNode.connectedNodes[1]
-        invisibleNode.connectedNodes[1] = tempNode
-        if(invisibleNode?.id)invisibleNode.operation = "update"
-        break
-      }
+  const firstNode = nodes.get(firstNodeName)
+  const secondNode = nodes.get(secondNodeName)
+  let connectionData
+  console.log(firstNode, secondNode, firstNodeName, secondNodeName)
+  for(const c of firstNode.connections){
+    if(c.name === secondNodeName){
+      connectionData = c
+      break
     }
-    return connections
   }
-  const deleteConnection = (connections) => {
-    for(let i = 0; i < connections.length; i++){
-      const invisibleNode = connections[i]
-      if(invisibleNode.connectedNodes[0].name === firstNode.name && invisibleNode.connectedNodes[1].name === secondNode.name){
-        if("id" in invisibleNode){
-          invisibleNode.operation = "delete"
-        }else{
-          connections.splice(i, 1)
-        }
-      }
+
+  const switchConnection = (firstNodeName, secondNodeName) => {
+    const firstNode = nodes.get(firstNodeName)
+    const secondNode = nodes.get(secondNodeName)
+    const firstNodeConnection = firstNode.connections.find(connection => connection.name === secondNodeName),
+          secondNodeConnection = secondNode.connections.find(connection => connection.name === firstNodeName)
+    
+    if(firstNodeConnection.direction === "")return
+    firstNodeConnection.direction = firstNodeConnection.direction === "xy" ? "yx" : "xy"
+    secondNodeConnection.direction = secondNodeConnection.direction === "xy" ? "yx" : "xy"
+
+    if(!firstNode?.operation)firstNode.operation = "update"
+    if(!firstNode?.operation)secondNode.operation = "update"
+
+    setNodes(prevState => {
+      const clonedMap = new Map([...prevState])
+      clonedMap.set(firstNodeName, firstNode)
+      clonedMap.set(secondNodeName, secondNode)
+      return clonedMap
+    })
+  }
+
+  const deleteConnection = (firstNodeName, secondNodeName) => {
+    const firstNode = nodes.get(firstNodeName)
+    const secondNode = nodes.get(secondNodeName)
+
+    if(!firstNode?.id || !secondNode?.id){
+      firstNode.connections = firstNode.connections.filter(connection => connection.name !== secondNodeName)
+      secondNode.connections = secondNode.connections.filter(connection => connection.name !== firstNodeName)
+      if(!firstNode?.operation)firstNode.operation = "update"
+      if(!secondNode?.operation)secondNode.operation = "update"
+      setNodes(prevState => {
+        const clonedMap = new Map([...prevState])
+        clonedMap.set(firstNodeName, firstNode)
+        clonedMap.set(secondNodeName, secondNode)
+        return clonedMap
+      })
+      return
     }
-    return connections
+
+    const firstNodeConnection = firstNode.connections.find(connection => connection.name === secondNodeName),
+          secondNodeConnection = secondNode.connections.find(connection => connection.name === firstNodeName)
+    firstNodeConnection.direction = ""
+    secondNodeConnection.direction = ""
+
+    if(!firstNode?.operation)firstNode.operation = "update"
+    if(!secondNode?.operation)secondNode.operation = "update"
+    setNodes(prevState => {
+      const clonedMap = new Map([...prevState])
+      clonedMap.set(firstNodeName, firstNode)
+      clonedMap.set(secondNodeName, secondNode)
+      return clonedMap
+    })
   }
   const handleClick = (e) => {
-    const tempConnections = JSON.parse(JSON.stringify(connections))
     switch(state){
       case "update":
-        setConnections(switchConnection(tempConnections))
+        switchConnection(firstNodeName, secondNodeName)
         break
       case "delete":
-        setConnections(deleteConnection(tempConnections))
+        deleteConnection(firstNodeName, secondNodeName)
         break
       default:
         break
     }
   }
-  console.log(firstNode, secondNode)
   return (
     !(connectionData?.operation === "delete" || connectionData?.operation === "hide") ?
     <Circle x={firstNode.ui.x} y={secondNode.ui.y} radius={invisibleNodeRadius} fill="#dcbcbc" onClick={handleClick}/> :
