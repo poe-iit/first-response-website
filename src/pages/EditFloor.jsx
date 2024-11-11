@@ -7,6 +7,21 @@ import Upload from '../components/Upload'
 import CanvasNavbar from "../components/CanvasNavbar"
 import UpdateNodeData from "../components/UpdateNodeData"
 
+/*
+
+  There should be a way to consolidate the data from websocket and current data
+  Maybe when you get the websocket data, if they have the same name and it's
+  operation is create then you add the id and update the operation to "update"
+
+  If a node was deleted then you could delete the node from the plan
+  If a node was updated then get the most up to date code, that way you get the
+  updates but at the same time you don't lose yours
+
+  Lastly, in the server isolate each node, each operation should finish it's
+  update before moving to the next, do not batch save, it's creates an
+  oppurtunity for race conditions and stale data
+*/
+
 const EditFloor = () => {
   const { id } = useParams()
   const stageRef = useRef()
@@ -74,6 +89,59 @@ const EditFloor = () => {
         console.log(err)
       }
     )
+
+    const websocket = new WebSocket(`${import.meta.env.VITE_SERVER_URI}`, "graphql-transport-ws")
+    const subscription = `
+      subscription{
+        floorUpdate(id: "${floorId}") {
+          id
+          name
+          nodes {
+            id
+            name
+            state
+            isExit
+            ui {
+              x
+              y
+            }
+            connections {
+              id
+              name
+              direction
+            }
+          }
+        }
+      }
+    `
+
+    websocket.onopen = () => {
+      websocket.send(JSON.stringify({
+        "type": "connection_init"
+      }))
+      const id = generateRandomId()
+      console.log(id)
+      websocket.send(JSON.stringify({
+        "id": id,
+        "type": "subscribe",
+        "payload": {
+          "query": subscription
+        }
+      }))
+    }
+    websocket.onmessage = (event) => {
+      const data = JSON.parse(event.data)
+      console.log(data)
+      if(data?.payload?.data?.floorUpdate){
+        const nodes = data.payload.data.floorUpdate.nodes
+        const mappedNodes = new Map()
+        for(const node of nodes){
+          if(node?.name)mappedNodes.set(node.name, node)
+        }
+        setNodes(mappedNodes)
+        setPrevSelectedNode(null)
+      }
+    }
   }
 
   useEffect(() => {
