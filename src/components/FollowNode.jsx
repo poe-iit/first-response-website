@@ -7,10 +7,15 @@ const FollowNode = () => {
   const { stageRef } = useContext(CanvasContext)
   const circleRef = useRef()
   const handleHover = (e) => {
+    const scale = stageRef.current.scaleX()
+    const position = stageRef.current.position()
+
+    const x = (e.clientX - position.x) / scale
+    const y = (e.clientY - position.y) / scale
     if(circleRef.current){
       circleRef.current.position({
-        x: e.clientX,
-        y: e.clientY
+        x,
+        y
       })
     }
   }
