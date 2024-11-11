@@ -5,7 +5,7 @@ import { CanvasContext } from '../hooks/CanvasContext'
 const Node = ({
   nodeData
 }) => {
-  const { state, nodes, setNodes, stageRef, prevSelectedNode, setPrevSelectedNode, connections, setConnections, setUpdateNode, nodeStates} = useContext(CanvasContext)
+  const { state, nodes, setNodes, stageRef, prevSelectedNode, setPrevSelectedNode, setUpdateNode, nodeStates} = useContext(CanvasContext)
   // Things that could be in useContext or gloabl config
   //circleRadius, prevSelectedNode, setPrevSelectedNode, setConnections, connections, setNodes, state, stageRef
   const circleRadius = 20
@@ -22,61 +22,58 @@ const Node = ({
     }
     // If user selected the same node
     if(prevSelectedNode.name === nodeData.name)return
-    let isConnected = false
     // Check to make sure we aren't double connecting
     // Maybe a seperate map would be nice but is it worth it?
-    for(const connection of connections){
-      if(connection?.operation === "hide" || connection?.operation === "delete")continue
-      const firstNode = connection.connectedNodes[0]
-      const secondNode = connection.connectedNodes[1]
-      if(
-        (
-          firstNode.name === prevSelectedNode.name || 
-          secondNode.name === prevSelectedNode.name
-        ) && (
-          firstNode.name === nodeData.name ||
-          secondNode.name === nodeData.name
-        )
-      ){
-        isConnected = true
-        break
+    
+    setNodes(prevState => {
+      const copyNode = new Map([...prevState])
+      const firstNode = copyNode.get(prevSelectedNode.name)
+      const secondNode = copyNode.get(nodeData.name)
+      const connection = firstNode.connections.find(connection => connection.name === secondNode.name)
+      console.log(JSON.stringify(connection))
+      if(!connection || connection.direction === ""){
+        firstNode.connections = firstNode.connections.filter(connection => connection.name !== secondNode.name)
+        secondNode.connections = secondNode.connections.filter(connection => connection.name !== firstNode.name)
+        const firstConnection = {}, secondConnection = {}
+        if(secondNode?.id)firstConnection.id = secondNode?.id
+        firstConnection.name = secondNode.name
+        firstConnection.direction = "xy"
+        if(firstNode?.id)secondConnection.id = firstNode?.id
+        secondConnection.name = firstNode.name
+        secondConnection.direction = "yx"
+        firstNode.connections.push(firstConnection)
+        secondNode.connections.push(secondConnection)
+        if(!firstNode.operation)firstNode.operation = "update"
+        if(!secondNode.operation)secondNode.operation = "update"
       }
-    }
-    if(isConnected)return
-    const invisibleNode = {
-      // Again try keeping only data needed or id and a quick lookup
-      connectedNodes: [prevSelectedNode, {id: nodeData?.id, name: nodeData.name}],
-      operation: "create"
-    }
-    setConnections([...connections, invisibleNode])
+      return copyNode
+    })
     setPrevSelectedNode(null)
   }
   const deleteNode = () => {
-    if("id" in nodeData){
-      setNodes(prevState => {
-        const copyNode = new Map(prevState)
-        const node = copyNode.get(nodeData.name)
-        node.operation = "delete"
-
-        return copyNode
-      })
-      setConnections(prevState => {
-        const copyConnection = [...prevState]
-        for(const connection of copyConnection){
-          if(connection.connectedNodes[0].name === nodeData.name || connection.connectedNodes[1].name === nodeData.name){
-            // Use "delete" instead, it does the smae thing
-            connection.operation = "hide"
-          }
+    setNodes(prevState => {
+      const copyNode = new Map([...prevState])
+      const node = copyNode.get(nodeData.name)
+      const connections = node.connections
+      const otherNodes = connections.map(connection => connection.name)
+      for(const otherNodeName of otherNodes){
+        const otherNode = copyNode.get(otherNodeName)
+        if(("id" in node) && ("id" in otherNode)){
+          const connection = node.connections.find(connection => connection.name === otherNodeName)
+          connection.direction = ""
+          const otherConnection = otherNode.connections.find(connection => connection.name === nodeData.name)
+          otherConnection.direction = ""
+        }else{
+          node.connections = node.connections.filter(connection => connection.name !== otherNodeName)
+          otherNode.connections = otherNode.connections.filter(connection => connection.name !== nodeData.name)
         }
-        return copyConnection
-      })
-    }else{
-      setNodes(prevState => {
-        prevState.delete(nodeData.name)
-        return prevState
-      })
-      setConnections(prevState => prevState.filter(connection => connection.connectedNodes[0].name !== nodeData.name && connection.connectedNodes[1].name !== nodeData.name))
-    }
+        if(!otherNode.operation)otherNode.operation = "update"
+      }
+      if("id" in nodeData)node.operation = "delete"
+      else copyNode.delete(nodeData.name)
+      if(!node.operation)node.operation = "update"
+      return copyNode
+    })
   }
   const changeNodeState = () => {
     console.log("Updated")
