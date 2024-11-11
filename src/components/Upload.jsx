@@ -6,52 +6,39 @@ import TextField from '@mui/material/TextField';
 import { useParams, useNavigate } from 'react-router-dom';
 
 const Upload = () => {
-  const { floorId, setFloorId, nodes, setNodes, connections, setConnections, setPrevSelectedNode, setUpload} = useContext(CanvasContext)
+  const { floorId, nodes, setNodes, setPrevSelectedNode, setUpload} = useContext(CanvasContext)
 
   const { buildingId } = useParams()
 
-  const [floorName, setFloorNmae] = useState("")
+  const [floorName, setFloorName] = useState("")
 
   const navigate = useNavigate()
 
   const uploadPlan = () => {
-    const createConnections = []
-    const updateConnections = []
 
-    const tempConnections = JSON.parse(JSON.stringify(connections))
+    const nodesArr = []
 
-    for(const connection of tempConnections){
-      if("operation" in connection){
-        const connectedNodes = connection.connectedNodes
-        const connections = []
-        if(connectedNodes[0].id) connections.push({ id: connectedNodes[0].id })
-        else connections.push({ name: connectedNodes[0].name })
-        if(connectedNodes[1].id) connections.push({ id: connectedNodes[1].id })
-        else connections.push({ name: connectedNodes[1].name })
-        delete connection.connectedNodes
-        connection.connections = connections
-        if(connection.operation === "create") createConnections.push(connection)
-        else if(connection.operation === "update" || connection.operation === "delete") updateConnections.push(connection)
+    const floorData = {
+      id: floorId,
+      name: floorName,
+      buildingId
+    }
 
-        if(connection.operation === "delete")connection.isDeleted = true
-        delete connection.operation
+    console.log(nodes)
+    for(const [_, node] of nodes){
+      console.log("Operations:", node.operation, "Connections:", node.connections)
+      if(node.operation){
+        nodesArr.push(node)
       }
     }
 
-    const createNodes = []
-    const updateNodes = []
-
-    for(const [_, node] of nodes){
-      if(node.operation === "create") createNodes.push(node)
-      else if(node.operation === "update" || node.operation === "delete") updateNodes.push(node)
-
-      if(node.operation === "delete")node.isDeleted = true
-      delete node.operation
-    }
+    floorData.nodes = nodesArr
+    console.log(nodesArr)
+    // floorData.nodes = []
 
     const query = `
-      mutation($createNodes: [CreateNodeInput]!, $createConnections: [CreateInvisibleNodeInput]!, $updateNodes: [UpdateNodeInput]!, $updateConnections: [UpdateInvisibleNodeInput]!, $floorId: ID!) {
-        updateFloorPlan(createNodeInputs: $createNodes, createInvisibleNodeInputs: $createConnections, updateNodeInputs: $updateNodes, updateInvisibleNodeInputs: $updateConnections, id: $floorId) {
+      mutation($floorData: CreateFloorInput!) {
+        createFloor(createFloorInput: $floorData) {
           id
           name
           nodes {
@@ -63,16 +50,10 @@ const Upload = () => {
               x
               y
             }
-          }
-          invisibleNodes {
-            id
-            connectedNodes {
+            connections {
               id
               name
-              ui {
-                x
-                y
-              }
+              direction
             }
           }
         }
@@ -80,11 +61,7 @@ const Upload = () => {
     `
 
     const variables = {
-      createNodes,
-      updateNodes,
-      createConnections,
-      updateConnections,
-      floorId
+      floorData
     }
 
     fetch(`${import.meta.env.VITE_SERVER_URI}/graphql`, {
@@ -99,16 +76,12 @@ const Upload = () => {
     ).then(
       res => {
         console.log(res)
-        if(res?.data?.updateFloorPlan){
-          const nodes = res.data.updateFloorPlan.nodes
-          const mappedNodes = new Map()
-          for(const node of nodes)mappedNodes.set(node.name, node)
-          setNodes(mappedNodes)
-          setConnections(res.data.updateFloorPlan.invisibleNodes)
+        if(res?.data?.createFloor){
+          setNodes(new Map())
           setPrevSelectedNode(null)
         }
         setUpload(false)
-        navigate(`/floor/${floorId}`)
+        navigate(`/floor/${res?.data?.createFloor?.id}`)
       }
     ).catch(
       err => {
@@ -117,45 +90,6 @@ const Upload = () => {
       }
     )
   }
-
-  const createFloor = () => {
-    if(!floorName?.length || !buildingId)return
-    console.log(floorName)
-    const query = `
-      mutation{
-        createFloor(createFloorInput: {name: "${floorName}", buildingId: "${buildingId}"}){
-          id
-        }
-      }
-    `
-
-    fetch(`${import.meta.env.VITE_SERVER_URI}/graphql`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include',
-      body: JSON.stringify({ query })
-    }).then(
-      res => res.json()
-    ).then(
-      res => {
-        console.log(res)
-        if(res?.data?.createFloor){
-          setFloorId(res.data.createFloor.id)
-        }
-      }
-    ).catch(
-      err => {
-        console.log(err)
-        setUpload(false)
-      }
-    )
-  }
-
-  useEffect(() => {
-    if(floorId)uploadPlan()
-  }, [floorId])
 
   const handleClick = (e) => {
     e.stopPropagation()
@@ -173,6 +107,12 @@ const Upload = () => {
       clearTimeout(timeout)
     }
   }, [ellipsisLength])
+  useEffect(() => {
+    if(floorId?.length)uploadPlan()
+  }, [floorId])
+  useEffect(() => {
+    console.log(nodes)
+  }, [nodes])
   return (
     <Container onClick={handleClick}>
       { floorId?.length ? 
@@ -182,9 +122,11 @@ const Upload = () => {
       <div onClick={e => e.stopPropagation()}>
         {/* We ask for name of floor here */}
         <h1>Add a floor name</h1>
-        <TextField id="outlined-basic" label="Basic Name" variant="outlined" onInput={e => setFloorNmae(e.target.value)} />
+        <TextField id="outlined-basic" label="Basic Name" variant="outlined" onInput={e => setFloorName(e.target.value)} />
         <div className='button-container'>
-          <button onClick={createFloor}>Upload Plan</button>
+          <button onClick={() => {
+            if(floorName?.length)uploadPlan()
+          }}>Upload Plan</button>
         </div>
       </div>
     }
