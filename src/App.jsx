@@ -47,6 +47,8 @@ function App() {
         res => {
           if(res?.data?.validateSession){
             setUser(res.data.validateSession)
+          }else{
+            setUser(false)
           }
         }
       )
@@ -59,13 +61,8 @@ function App() {
     }else{
       setIsAuth(false)
     }
+    if(user === false)navigate("/login")
   }, [user])
-
-  useEffect(() => {
-    if(!isAuth){
-      navigate("/login")
-    }
-  }, [isAuth])
 
   useEffect(() => {
     const handleMouseOver = (e) => {
