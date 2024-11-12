@@ -73,11 +73,10 @@ const CanvasNavbar = ({ modulesAllowed }) => {
   }, [])
 
   return (
-    <Container>
-
+    <Container data-stop={true}>
       {
         modules.has("lock") ? 
-        <button onClick={toggleCanvasIsDraggable}>
+        <button onClick={toggleCanvasIsDraggable} data-title={canvasIsDraggable ? "Unlock Canvas" : "Lock Canvas"}>
           {
             canvasIsDraggable ? 
             <LockOpenIcon sx={{
@@ -96,6 +95,7 @@ const CanvasNavbar = ({ modulesAllowed }) => {
         <button 
           onClick={() => setState(state === "default" ? "" : "default")} 
           className={state === "default" ? "active" : ""}
+          data-title="Move Nodes"
         >
           <img id="default-icon" src={cursor} alt="Set default"/>
         </button> :
@@ -107,6 +107,7 @@ const CanvasNavbar = ({ modulesAllowed }) => {
         <button
           onClick={() => setState(state === "fire" ? "" : "fire")}
           className={state === "fire" ? "active" : ""}
+          data-title={"Set Node On Fire"}
         >
           <WhatshotIcon sx={{
             fontSize: "1.3em"
@@ -120,6 +121,7 @@ const CanvasNavbar = ({ modulesAllowed }) => {
         <button 
           onClick={() => setState(state === "create" ? "" : "create")}
           className={state === "create" ? "active" : ""}
+          data-title="Create Node"
         >
           <AddCircleOutlineIcon 
             sx={{
@@ -135,6 +137,7 @@ const CanvasNavbar = ({ modulesAllowed }) => {
         <button 
           onClick={() => setState(state === "connect" ? "" : "connect")}
           className={state === "connect" ? "active" : ""}
+          data-title="Connect Nodes"
         >
           <PolylineIcon 
             sx={{
@@ -150,6 +153,7 @@ const CanvasNavbar = ({ modulesAllowed }) => {
         <button
           onClick={() => setState(state === "delete" ? "" : "delete")}
           className={state === "delete" ? "active" : ""}
+          data-title="Delete Node/Connection"
         >
           <DeleteOutlineIcon
             sx={{
@@ -164,6 +168,7 @@ const CanvasNavbar = ({ modulesAllowed }) => {
         <button
           onClick={() => setState("exit")}
           className={state === "exit" ? "active" : ""}
+          data-title="Toggle Exit Mode"
         >
           <RoomPreferencesIcon 
             sx={{
@@ -182,6 +187,7 @@ const CanvasNavbar = ({ modulesAllowed }) => {
         <button
           onClick={() => setState(state === "update" ? "" : "update")}
           className={state === "update" ? "active" : ""}
+          data-title="Update Node/Connection"
         >
           <EditNoteIcon
             sx={{
@@ -200,6 +206,7 @@ const CanvasNavbar = ({ modulesAllowed }) => {
             sx={{
               fontSize: "1.3em"
             }}
+            data-title="Upload Floor Plan"
           />
         </button>: 
         <></>
@@ -210,6 +217,7 @@ const CanvasNavbar = ({ modulesAllowed }) => {
         modules.has("center") ? 
         <button
           onClick={centerPlan}
+          data-title="Center Plan"
         >
           <CenterFocusStrongIcon
             sx={{
@@ -224,6 +232,7 @@ const CanvasNavbar = ({ modulesAllowed }) => {
         modules.has("upload") ?
         <button
           onClick={() => setUpload(true)}
+          data-title="Upload Floor Plan"
         >
           <PublishIcon
             sx={{
@@ -236,7 +245,7 @@ const CanvasNavbar = ({ modulesAllowed }) => {
 
       {
         modules.has("edit") ? 
-        <Link to="edit">
+        <Link to="edit" data-title="Edit Floor Plan">
           <OpenInNewIcon
             sx={{
               fontSize: "1.3em"
