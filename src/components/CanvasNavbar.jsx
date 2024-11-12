@@ -75,7 +75,7 @@ const CanvasNavbar = ({ modulesAllowed }) => {
     <Container data-stop={true}>
       {
         modules.has("lock") ? 
-        <button onClick={toggleCanvasIsDraggable} data-title={canvasIsDraggable ? "Unlock Canvas" : "Lock Canvas"}>
+        <button onClick={toggleCanvasIsDraggable} data-title={canvasIsDraggable ? "Lock Canvas" : "Unlock Canvas"}>
           {
             canvasIsDraggable ? 
             <LockOpenIcon sx={{
