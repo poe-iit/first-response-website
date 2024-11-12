@@ -23,8 +23,6 @@ const Floor = () => {
   const [upload, setUpload] = useState(false)
   const [updateNode, setUpdateNode] = useState()
   const [nodeStates, setNodeStates] = useState(new Map())
-
-  console.log(id)
   
   const getFloorPlan = (floorId) => {
     const query = `
@@ -66,7 +64,6 @@ const Floor = () => {
       res => res.json()
     ).then(
       res => {
-        console.log(res)
         if(res?.data?.getFloorPlan){
           const nodes = res.data.getFloorPlan.nodes
           const mappedNodes = new Map()
@@ -113,7 +110,6 @@ const Floor = () => {
         "type": "connection_init"
       }))
       const id = generateRandomId()
-      console.log(id)
       websocket.send(JSON.stringify({
         "id": id,
         "type": "subscribe",
@@ -124,7 +120,6 @@ const Floor = () => {
     }
     websocket.onmessage = (event) => {
       const data = JSON.parse(event.data)
-      console.log(data)
       if(data?.payload?.data?.floorUpdate){
         const nodes = data.payload.data.floorUpdate.nodes
         const mappedNodes = new Map()

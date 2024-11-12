@@ -24,16 +24,13 @@ const Upload = () => {
       buildingId
     }
 
-    console.log(nodes)
     for(const [_, node] of nodes){
-      console.log("Operations:", node.operation, "Connections:", node.connections)
       if(node.operation){
         nodesArr.push(node)
       }
     }
 
     floorData.nodes = nodesArr
-    console.log(nodesArr)
     // floorData.nodes = []
 
     const query = `
@@ -75,9 +72,14 @@ const Upload = () => {
       res => res.json()
     ).then(
       res => {
-        console.log(res)
-        if(res?.data?.createFloor){
-          setNodes(new Map())
+        const { data } = res
+        if(data?.payload?.data?.createFloor){
+          const nodes = data.payload.data.createFloor.nodes
+          const mappedNodes = new Map()
+          for(const node of nodes){
+            if(node?.name)mappedNodes.set(node.name, node)
+          }
+          setNodes(mappedNodes)
           setPrevSelectedNode(null)
         }
         setUpload(false)
@@ -110,9 +112,6 @@ const Upload = () => {
   useEffect(() => {
     if(floorId?.length)uploadPlan()
   }, [floorId])
-  useEffect(() => {
-    console.log(nodes)
-  }, [nodes])
   return (
     <Container onClick={handleClick}>
       { floorId?.length ? 

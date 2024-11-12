@@ -22,7 +22,6 @@ const Floor = ({name, id, setBuildings}) => {
     }).then(
       res => res.json()
     ).then(res => {
-      console.log(res)
       if(res?.data?.updateFloor === null){
         setBuildings(prevState => {
           const arr = []

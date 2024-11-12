@@ -31,8 +31,6 @@ const UpdateNodeData = () => {
   const handleClick = (e) => {
     e.stopPropagation()
     // Keep the error handling here
-    console.log("Working")
-    console.log(node.name)
     if(!node?.name?.length)return
     // Add errors here too
     if(node.name !== nodeData.name && nodes.has(node.name))return
@@ -42,7 +40,6 @@ const UpdateNodeData = () => {
         const currentNode = nodesCopy.get(nodeData.name)
         currentNode.name = node.name
         currentNode.operation = "update"
-        console.log(nodeData.name, node.name)
         nodesCopy.delete(nodeData.name)
         nodesCopy.set(node.name, currentNode)
         const connections = nodesCopy.get(node.name).connections
@@ -58,7 +55,6 @@ const UpdateNodeData = () => {
         currentNode.operation = "update"
         nodesCopy.set(node.name, currentNode)
       }
-      console.log(nodesCopy, nodesCopy.size)
       return nodesCopy
     })
     setUpdateNode()

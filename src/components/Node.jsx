@@ -30,7 +30,6 @@ const Node = ({
       const firstNode = copyNode.get(prevSelectedNode.name)
       const secondNode = copyNode.get(nodeData.name)
       const connection = firstNode.connections.find(connection => connection.name === secondNode.name)
-      console.log(JSON.stringify(connection))
       if(!connection || connection.direction === ""){
         firstNode.connections = firstNode.connections.filter(connection => connection.name !== secondNode.name)
         secondNode.connections = secondNode.connections.filter(connection => connection.name !== firstNode.name)
@@ -76,7 +75,6 @@ const Node = ({
     })
   }
   const changeNodeState = () => {
-    console.log("Updated")
 
     const clonedNodes = new Map(nodes)
     const node = clonedNodes.get(nodeData.name)
@@ -86,7 +84,6 @@ const Node = ({
     setNodes(clonedNodes)
   }
   const changeNodeExit = () => {
-    console.log("Updated")
 
     const clonedNodes = new Map(nodes)
     const node = clonedNodes.get(nodeData.name)
@@ -138,7 +135,6 @@ const Node = ({
       if("id" in nodeData)node.operation = "update"
       return newNodes
     })
-    console.log("Updated")
   }
   const handleDragStart = (e) => {
     // Keep an animation or box shadow here

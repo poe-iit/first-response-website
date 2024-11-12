@@ -11,7 +11,6 @@ const InvisibleNode = ({
   const firstNode = nodes.get(firstNodeName)
   const secondNode = nodes.get(secondNodeName)
   let connectionData
-  console.log(firstNode, secondNode, firstNodeName, secondNodeName)
   for(const c of firstNode.connections){
     if(c.name === secondNodeName){
       connectionData = c

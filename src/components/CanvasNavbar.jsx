@@ -69,7 +69,6 @@ const CanvasNavbar = ({ modulesAllowed }) => {
 
   useEffect(() => {
     setModules(new Set(modulesAllowed || []))
-    console.log(modulesAllowed)
   }, [])
 
   return (

@@ -75,7 +75,6 @@ const Background = () => {
 
   useEffect(() => {
     createLines()
-    console.log(stageRef)
     stageRef.current?.addEventListener("dragmove positionchanged zoom", createLines)
     window.addEventListener("resize", createLines)
     return () => {
