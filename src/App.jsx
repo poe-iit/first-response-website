@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import Home from './pages/Home'
 import Login from './pages/Login'
@@ -18,6 +18,7 @@ function App() {
   const [description, setDescription] = useState("")
   const descriptionRef = useRef(null)
   const element = useRef()
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (!user) {
@@ -59,6 +60,12 @@ function App() {
       setIsAuth(false)
     }
   }, [user])
+
+  useEffect(() => {
+    if(!isAuth){
+      navigate("/login")
+    }
+  }, [isAuth])
 
   useEffect(() => {
     const handleMouseOver = (e) => {
