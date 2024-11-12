@@ -78,11 +78,6 @@ const Canvas = ({ edit }) => {
   };
 
   useEffect(() => {
-    console.log(nodes)
-  }, [nodes])
-  useEffect(() => {
-    console.log(stageRef.current)
-    setTimeout
     window.addEventListener("resize", handleResize)
     return () => {
       window.removeEventListener("resize", handleResize)

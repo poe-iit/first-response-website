@@ -146,6 +146,9 @@ const EditFloor = () => {
         setPrevSelectedNode(null)
       }
     }
+    websocket.onclose = () => {
+      console.log("Websocket closed")
+    }
   }
 
   useEffect(() => {

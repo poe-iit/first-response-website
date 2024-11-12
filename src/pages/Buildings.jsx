@@ -29,7 +29,6 @@ const Buildings = () => {
       res => res.json()
     ).then(
       res => {
-        console.log(res)
         if("getBuildings" in res?.data){
           setBuildings(res.data.getBuildings)
         }
