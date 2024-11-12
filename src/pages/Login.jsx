@@ -46,6 +46,7 @@ const Login = () => {
       res => {
         if(!res?.data?.loginUser){
           setLoginCount(loginCount + 1)
+          setUser(false)
         }else{
           setUser(res.data.loginUser)
         }
