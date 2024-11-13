@@ -38,6 +38,66 @@ const EditFloor = () => {
   const [upload, setUpload] = useState(false)
   const [updateNode, setUpdateNode] = useState()
   const [nodeStates, setNodeStates] = useState(new Map())
+  const wsRef = useRef(null)
+
+  const connectWebSocket = () => {
+    wsRef.current = new WebSocket(`${import.meta.env.VITE_SERVER_URI}`, "graphql-transport-ws")
+    const subscription = `
+      subscription{
+        floorUpdate(id: "${floorId}") {
+          id
+          name
+          nodes {
+            id
+            name
+            state
+            isExit
+            ui {
+              x
+              y
+            }
+            connections {
+              id
+              name
+              direction
+            }
+          }
+        }
+      }
+    `
+
+    wsRef.current.onopen = () => {
+      wsRef.current.send(JSON.stringify({
+        "type": "connection_init"
+      }))
+      const id = generateRandomId()
+      wsRef.current.send(JSON.stringify({
+        "id": id,
+        "type": "subscribe",
+        "payload": {
+          "query": subscription
+        }
+      }))
+    }
+    wsRef.current.onmessage = (event) => {
+      const data = JSON.parse(event.data)
+      if(data?.payload?.data?.floorUpdate){
+        const nodes = data.payload.data.floorUpdate.nodes
+        const mappedNodes = new Map()
+        for(const node of nodes){
+          if(node?.name)mappedNodes.set(node.name, node)
+        }
+        setNodes(mappedNodes)
+        setPrevSelectedNode(null)
+      }
+    }
+  }
+  const reconnectIfNeeded = () => {
+    console.log("Reconnecting...")
+    if (wsRef.current && wsRef.current.readyState === WebSocket.CLOSED) {
+      connectWebSocket()
+    }
+  }
   
   const getFloorPlan = (floorId) => {
     const query = `
@@ -94,65 +154,15 @@ const EditFloor = () => {
       }
     )
 
-    const websocket = new WebSocket(`${import.meta.env.VITE_SERVER_URI}`, "graphql-transport-ws")
-    const subscription = `
-      subscription{
-        floorUpdate(id: "${floorId}") {
-          id
-          name
-          nodes {
-            id
-            name
-            state
-            isExit
-            ui {
-              x
-              y
-            }
-            connections {
-              id
-              name
-              direction
-            }
-          }
-        }
-      }
-    `
-
-    websocket.onopen = () => {
-      websocket.send(JSON.stringify({
-        "type": "connection_init"
-      }))
-      const id = generateRandomId()
-      console.log(id)
-      websocket.send(JSON.stringify({
-        "id": id,
-        "type": "subscribe",
-        "payload": {
-          "query": subscription
-        }
-      }))
-    }
-    websocket.onmessage = (event) => {
-      const data = JSON.parse(event.data)
-      console.log(data)
-      if(data?.payload?.data?.floorUpdate){
-        const nodes = data.payload.data.floorUpdate.nodes
-        const mappedNodes = new Map()
-        for(const node of nodes){
-          if(node?.name)mappedNodes.set(node.name, node)
-        }
-        setNodes(mappedNodes)
-        setPrevSelectedNode(null)
-      }
-    }
-    websocket.onclose = () => {
-      console.log("Websocket closed")
-    }
+    connectWebSocket()
   }
 
   useEffect(() => {
     getFloorPlan(id)
+    document.addEventListener("visibilitychange", reconnectIfNeeded)
+    return () => {
+      document.removeEventListener("visibilitychange", reconnectIfNeeded)
+    }
   }, [])
 
   return (
