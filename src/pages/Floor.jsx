@@ -76,6 +76,9 @@ const Floor = () => {
         setPrevSelectedNode(null)
       }
     }
+    wsRef.current.onclose = () => {
+      reconnectIfNeeded()
+    }
   }
   const reconnectIfNeeded = () => {
     console.log("Reconnecting...")
