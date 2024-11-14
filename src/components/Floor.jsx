@@ -4,6 +4,7 @@ import Delete from '@mui/icons-material/Delete'
 
 const Floor = ({name, id, setBuildings}) => {
   const deleteFloor = () => {
+    const token = localStorage.getItem("token")
     const query =`
       mutation{
         createFloor(createFloorInput: {id: "${id}", name: "${name}", isDeleted: true}){
@@ -15,7 +16,8 @@ const Floor = ({name, id, setBuildings}) => {
     fetch(`${import.meta.env.VITE_SERVER_URI}/graphql`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
       },
       credentials: 'include',
       body: JSON.stringify({ query })

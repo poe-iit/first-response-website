@@ -20,15 +20,19 @@ const Login = () => {
   const navigate = useNavigate()
   const handleSubmit = (e) => {
     e.preventDefault()
-
+    const token = localStorage.getItem('token')
     const query = `
       query {
         loginUser(email: "${email}", password: "${password}") {
-          id
-          username
-          email
-          accountStatus
-          roles
+          token
+          expiresIn
+          user {
+            id
+            username
+            email
+            accountStatus
+            roles
+          }
         }
       }
     `
@@ -36,7 +40,8 @@ const Login = () => {
     fetch(`${import.meta.env.VITE_SERVER_URI}/graphql`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
       },
       credentials: 'include',
       body: JSON.stringify({ query })
@@ -44,11 +49,13 @@ const Login = () => {
       res => res.json()
     ).then(
       res => {
-        if(!res?.data?.loginUser){
+        if(!res?.data?.loginUser?.user){
           setLoginCount(loginCount + 1)
           setUser(false)
         }else{
-          setUser(res.data.loginUser)
+          localStorage.setItem('token', res.data.loginUser?.token)
+          localStorage.setItem('expiresIn', res.data.loginUser?.expiresIn)
+          setUser(res.data.loginUser?.user)
         }
       }
     )

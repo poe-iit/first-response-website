@@ -18,6 +18,7 @@ const Logs = () => {
   const [totalCount, setTotalCount] = useState(0)
 
   const getLogs = () => {
+    const token = localStorage.getItem('token')
     const query = `
       query($logInput: LogInput) {
         getLogs(logInput: $logInput){
@@ -57,7 +58,8 @@ const Logs = () => {
     fetch(`${import.meta.env.VITE_SERVER_URI}/graphql`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
       },
       credentials: 'include',
       body: JSON.stringify({ query, variables })
