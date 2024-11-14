@@ -20,41 +20,6 @@ function App() {
   const element = useRef()
   const navigate = useNavigate()
 
-  useEffect(() => {
-    if (!user) {
-      const query = `
-        query {
-          validateSession {
-            id
-            username
-            email
-            accountStatus
-            roles
-          }
-        }
-      `
-
-      fetch(`${import.meta.env.VITE_SERVER_URI}/graphql`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ query })
-      }).then(
-        res => res.json()
-      ).then(
-        res => {
-          if(res?.data?.validateSession){
-            setUser(res.data.validateSession)
-          }else{
-            setUser(false)
-          }
-        }
-      )
-    }
-  }, [])
-
   const removeData = () => {
     localStorage.removeItem("token")
     localStorage.removeItem("expiresIn")
