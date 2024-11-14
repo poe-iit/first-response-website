@@ -55,6 +55,63 @@ function App() {
     }
   }, [])
 
+  const removeData = () => {
+    localStorage.removeItem("token")
+    localStorage.removeItem("expiresIn")
+    setUser(null)
+  }
+
+  useEffect(() => {
+    const expiresIn = localStorage.getItem("expiresIn")
+    const token = localStorage.getItem("token")
+    if(!expiresIn){
+      removeData()
+    }else{
+      const expirationDate = new Date(parseInt(expiresIn))
+      const now = new Date()
+      if(now > expirationDate){
+        removeData()
+      }else{
+        const query = `
+          query {
+            validateSession {
+              id
+              username
+              email
+              accountStatus
+              roles
+            }
+          }
+        `
+
+        fetch(`${import.meta.env.VITE_SERVER_URI}/graphql`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          credentials: 'include',
+          body: JSON.stringify({ query })
+        }).then(
+          res => res.json()
+        ).then(
+          res => {
+            if(res?.data?.validateSession){
+              setUser(res.data.validateSession)
+              setTimeout(removeData, expirationDate.getTime() - now.getTime())
+            }else{
+              setUser(false)
+              removeData()
+            }
+          }
+        )
+      }
+    }
+    return () => {
+      clearTimeout(removeData)
+    }
+  }, [])
+
   useEffect(() => {
     if(user) {
       setIsAuth(true)
