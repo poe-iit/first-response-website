@@ -15,6 +15,7 @@ const Upload = () => {
   const navigate = useNavigate()
 
   const uploadPlan = () => {
+    const token = localStorage.getItem("token")
 
     const nodesArr = []
 
@@ -64,7 +65,8 @@ const Upload = () => {
     fetch(`${import.meta.env.VITE_SERVER_URI}/graphql`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
       },
       credentials: 'include',
       body: JSON.stringify({ query, variables })

@@ -6,6 +6,7 @@ import { AuthContext } from "../hooks/AuthContext"
 const Home = () => {
   const { setUser } = useContext(AuthContext)
   const logout = () => {
+    const token = localStorage.getItem("token")
     const query = `
       query {
         logoutUser {
@@ -18,7 +19,8 @@ const Home = () => {
     fetch(`${import.meta.env.VITE_SERVER_URI}/graphql`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
       },
       credentials: 'include',
       body: JSON.stringify({ query })

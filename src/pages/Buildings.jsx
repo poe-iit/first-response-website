@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom'
 const Buildings = () => {
   const [buildings, setBuildings] = useState([])
   const getBuildings = () => {
+    const token = localStorage.getItem("token")
     const query = `
       query {
         getBuildings{
@@ -21,7 +22,8 @@ const Buildings = () => {
     fetch(`${import.meta.env.VITE_SERVER_URI}/graphql`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
       },
       credentials: 'include',
       body: JSON.stringify({ query })
