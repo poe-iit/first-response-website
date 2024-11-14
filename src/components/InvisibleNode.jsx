@@ -85,7 +85,7 @@ const InvisibleNode = ({
   }
   return (
     !(connectionData?.operation === "delete" || connectionData?.operation === "hide") ?
-    <Circle x={firstNode.ui.x} y={secondNode.ui.y} radius={invisibleNodeRadius} fill="#dcbcbc" onClick={handleClick}/> :
+    <Circle x={firstNode.ui.x} y={secondNode.ui.y} radius={invisibleNodeRadius} fill="#dcbcbc" onClick={handleClick} onTap={handleClick}/> :
     <></>
   )
 }

@@ -85,7 +85,7 @@ const Canvas = ({ edit }) => {
   }, [])
 
   return (
-    <Stage width={window.innerWidth} height={window.innerHeight} onClick={handleClick} ref={stageRef} draggable={canvasIsDraggable} onWheel={handleWheel}
+    <Stage width={window.innerWidth} height={window.innerHeight} onClick={handleClick} onTap={handleClick} ref={stageRef} draggable={canvasIsDraggable} onWheel={handleWheel}
     >
       <Layer>
         <Background />

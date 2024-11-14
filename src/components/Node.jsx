@@ -153,6 +153,7 @@ const Node = ({
       }
       radius={circleRadius}
       onClick={handleClick}
+      onTap={handleClick}
       draggable={state === "default"}
       onDragStart={handleDragStart}
       // onDragMove={handleDragMove}
