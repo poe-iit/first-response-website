@@ -5,6 +5,7 @@ import InvisibleNode from "./InvisibleNode";
 import ConnectedLines from "./ConnectedLines";
 import Background from "./Background";
 import FollowNode from "./FollowNode";
+import Image from "./Image";
 import { CanvasContext } from "../hooks/CanvasContext";
 import Arrows from "./Arrows";
 
@@ -89,6 +90,7 @@ const Canvas = ({ edit }) => {
     >
       <Layer>
         <Background />
+        <Image />
       </Layer>
       <Layer>
         {

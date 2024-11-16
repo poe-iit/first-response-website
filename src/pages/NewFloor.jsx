@@ -5,6 +5,7 @@ import Canvas from '../components/Canvas'
 import Upload from '../components/Upload'
 import CanvasNavbar from "../components/CanvasNavbar"
 import UpdateNodeData from "../components/UpdateNodeData"
+import ImageUpload from "../components/ImageUpload"
 
 const NewFloor = () => {
   const stageRef = useRef()
@@ -17,10 +18,12 @@ const NewFloor = () => {
   const [upload, setUpload] = useState(false)
   const [updateNode, setUpdateNode] = useState()
   const [nodeStates, setNodeStates] = useState(new Map())
+  const [uploadImage, setUploadImage] = useState(false)
+  const [image, setImage] = useState(null)
 
   return (
     <Container>
-      <CanvasContext.Provider value={{stageRef, floorId, setFloorId, state, setState, nodes, setNodes, connections, setConnections, prevSelectedNode, setPrevSelectedNode, canvasIsDraggable, setCanvasIsDraggable, upload, setUpload, updateNode, setUpdateNode, nodeStates, setNodeStates }}>
+      <CanvasContext.Provider value={{stageRef, floorId, setFloorId, state, setState, nodes, setNodes, connections, setConnections, prevSelectedNode, setPrevSelectedNode, canvasIsDraggable, setCanvasIsDraggable, upload, setUpload, updateNode, setUpdateNode, nodeStates, setNodeStates, uploadImage, setUploadImage, image, setImage }}>
         <Canvas edit={true}/>
         <CanvasNavbar modulesAllowed={[
           "lock",
@@ -38,6 +41,7 @@ const NewFloor = () => {
         ]}/>
         {upload ? <Upload /> : <></>}
         {updateNode ? <UpdateNodeData /> : <></>}
+        {uploadImage ? <ImageUpload /> : <></>}
       </CanvasContext.Provider>
     </Container>
   )

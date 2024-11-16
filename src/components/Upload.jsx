@@ -6,7 +6,7 @@ import TextField from '@mui/material/TextField';
 import { useParams, useNavigate } from 'react-router-dom';
 
 const Upload = () => {
-  const { floorId, nodes, setNodes, setPrevSelectedNode, setUpload} = useContext(CanvasContext)
+  const { floorId, nodes, image, setNodes, setPrevSelectedNode, setUpload, setImage } = useContext(CanvasContext)
 
   const { buildingId } = useParams()
 
@@ -22,7 +22,13 @@ const Upload = () => {
     const floorData = {
       id: floorId,
       name: floorName,
-      buildingId
+      buildingId,
+      image: {
+        url: image?.url,
+        name: image?.name,
+        position: image?.position,
+        scale: image?.scale
+      }
     }
 
     for(const [_, node] of nodes){
@@ -39,6 +45,12 @@ const Upload = () => {
         createFloor(createFloorInput: $floorData) {
           id
           name
+          image{
+            url
+            name
+            position
+            scale
+          }
           nodes {
             id
             name
@@ -74,6 +86,7 @@ const Upload = () => {
       res => res.json()
     ).then(
       res => {
+        console.log(res)
         const { data } = res
         if(data?.payload?.data?.createFloor){
           const nodes = data.payload.data.createFloor.nodes
@@ -83,6 +96,13 @@ const Upload = () => {
           }
           setNodes(mappedNodes)
           setPrevSelectedNode(null)
+          setImage({
+            name: data.payload.data.createFloor?.image?.name,
+            url: data.payload.data.createFloor?.image?.url,
+            position: data.payload.data.createFloor?.image?.position,
+            initialUrl: data.payload.data.createFloor?.image?.url,
+            scale: data.payload.data.createFloor?.image?.scale
+          })
         }
         setUpload(false)
         navigate(`/floor/${res?.data?.createFloor?.id}`)

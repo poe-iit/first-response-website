@@ -5,7 +5,6 @@ import styled from "styled-components"
 import Canvas from '../components/Canvas'
 import Upload from '../components/Upload'
 import CanvasNavbar from "../components/CanvasNavbar"
-import UpdateNodeData from "../components/UpdateNodeData"
 
 const generateRandomId = () => {
   return Math.random().toString(36).substring(2, 9);
@@ -21,8 +20,8 @@ const Floor = () => {
   const [floorId, setFloorId] = useState(id)
   const [canvasIsDraggable, setCanvasIsDraggable] = useState(true)
   const [upload, setUpload] = useState(false)
-  const [updateNode, setUpdateNode] = useState()
   const [nodeStates, setNodeStates] = useState(new Map())
+  const [image, setImage] = useState(null)
   const wsRef = useRef(null)
 
   const connectWebSocket = () => {
@@ -32,6 +31,12 @@ const Floor = () => {
         floorUpdate(id: "${floorId}") {
           id
           name
+          image{
+            url
+            name
+            position
+            scale
+          }
           nodes {
             id
             name
@@ -66,6 +71,7 @@ const Floor = () => {
     }
     wsRef.current.onmessage = (event) => {
       const data = JSON.parse(event.data)
+      console.log(data)
       if(data?.payload?.data?.floorUpdate){
         const nodes = data.payload.data.floorUpdate.nodes
         const mappedNodes = new Map()
@@ -74,6 +80,13 @@ const Floor = () => {
         }
         setNodes(mappedNodes)
         setPrevSelectedNode(null)
+        setImage({
+          name: data.payload.data.floorUpdate?.image?.name,
+          url: data.payload.data.floorUpdate?.image?.url,
+          position: data.payload.data.floorUpdate?.image?.position,
+          initialUrl: data.payload.data.floorUpdate?.image?.url,
+          scale: data.payload.data.floorUpdate?.image?.scale
+        })
       }
     }
     wsRef.current.onclose = () => {
@@ -94,6 +107,12 @@ const Floor = () => {
         getFloorPlan(id: $floorId) {
           id
           name
+          image{
+            url
+            name
+            position
+            scale
+          }
           nodes {
             id
             name
@@ -137,6 +156,13 @@ const Floor = () => {
           }
           setNodes(mappedNodes)
           setPrevSelectedNode(null)
+          setImage({
+            name: res.data.getFloorPlan?.image?.name,
+            url: res.data.getFloorPlan?.image?.url,
+            position: res.data.getFloorPlan?.image?.position,
+            initialUrl: res.data.getFloorPlan?.image?.url,
+            scale: res.data.getFloorPlan?.image?.scale
+          })
         }
       }
     ).catch(
@@ -158,7 +184,7 @@ const Floor = () => {
 
   return (
     <Container>
-      <CanvasContext.Provider value={{stageRef, floorId, setFloorId, state, setState, nodes, setNodes, connections, setConnections, prevSelectedNode, setPrevSelectedNode, canvasIsDraggable, setCanvasIsDraggable, upload, setUpload, updateNode, setUpdateNode, nodeStates, setNodeStates  }}>
+      <CanvasContext.Provider value={{stageRef, floorId, setFloorId, state, setState, nodes, setNodes, connections, setConnections, prevSelectedNode, setPrevSelectedNode, canvasIsDraggable, setCanvasIsDraggable, upload, setUpload, nodeStates, setNodeStates, image, setImage  }}>
         <Canvas />
         <CanvasNavbar modulesAllowed={[
           "lock",
@@ -175,7 +201,6 @@ const Floor = () => {
           "edit"
         ]}/>
         {upload ? <Upload /> : <></>}
-        {updateNode ? <UpdateNodeData /> : <></>}
       </CanvasContext.Provider>
     </Container>
   )
