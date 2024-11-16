@@ -6,6 +6,7 @@ import Canvas from '../components/Canvas'
 import Upload from '../components/Upload'
 import CanvasNavbar from "../components/CanvasNavbar"
 import UpdateNodeData from "../components/UpdateNodeData"
+import ImageUpload from "../components/ImageUpload"
 
 /*
 
@@ -38,6 +39,8 @@ const EditFloor = () => {
   const [upload, setUpload] = useState(false)
   const [updateNode, setUpdateNode] = useState()
   const [nodeStates, setNodeStates] = useState(new Map())
+  const [uploadImage, setUploadImage] = useState(false)
+  const [image, setImage] = useState(null)
   const wsRef = useRef(null)
 
   const connectWebSocket = () => {
@@ -89,6 +92,13 @@ const EditFloor = () => {
         }
         setNodes(mappedNodes)
         setPrevSelectedNode(null)
+        setImage({
+          name: data.payload.data.floorUpdate?.image?.name,
+          url: data.payload.data.floorUpdate?.image?.url,
+          position: data.payload.data.floorUpdate?.image?.position,
+          initialUrl: data.payload.data.floorUpdate?.image?.url,
+          scale: data.payload.data.floorUpdate?.image?.scale
+        })
       }
     }
   }
@@ -106,6 +116,12 @@ const EditFloor = () => {
         getFloorPlan(id: $floorId) {
           id
           name
+          image{
+            url
+            name
+            position
+            scale
+          }
           nodes {
             id
             name
@@ -148,6 +164,13 @@ const EditFloor = () => {
           for(const node of nodes)mappedNodes.set(node.name, node)
           setNodes(mappedNodes)
           setPrevSelectedNode(null)
+          setImage({
+            name: res.data.getFloorPlan?.image?.name,
+            url: res.data.getFloorPlan?.image?.url,
+            position: res.data.getFloorPlan?.image?.position,
+            initialUrl: res.data.getFloorPlan?.image?.url,
+            scale: res.data.getFloorPlan?.image?.scale
+          })
         }
       }
     ).catch(
@@ -169,7 +192,7 @@ const EditFloor = () => {
 
   return (
     <Container>
-      <CanvasContext.Provider value={{stageRef, floorId, setFloorId, state, setState, nodes, setNodes, connections, setConnections, prevSelectedNode, setPrevSelectedNode, canvasIsDraggable, setCanvasIsDraggable, upload, setUpload, updateNode, setUpdateNode, nodeStates, setNodeStates  }}>
+      <CanvasContext.Provider value={{stageRef, floorId, setFloorId, state, setState, nodes, setNodes, connections, setConnections, prevSelectedNode, setPrevSelectedNode, canvasIsDraggable, setCanvasIsDraggable, upload, setUpload, updateNode, setUpdateNode, nodeStates, setNodeStates, uploadImage, setUploadImage, image, setImage }}>
         <Canvas edit={true} />
         <CanvasNavbar modulesAllowed={[
           "lock",
@@ -187,6 +210,7 @@ const EditFloor = () => {
         ]}/>
         {upload ? <Upload /> : <></>}
         {updateNode ? <UpdateNodeData /> : <></>}
+        {uploadImage ? <ImageUpload /> : <></>}
       </CanvasContext.Provider>
     </Container>
   )

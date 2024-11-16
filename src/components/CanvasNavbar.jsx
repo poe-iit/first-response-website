@@ -19,7 +19,7 @@ import { Link } from 'react-router-dom';
 
 const CanvasNavbar = ({ modulesAllowed }) => {
   const [modules, setModules] = useState(new Set())
-  const { stageRef, canvasIsDraggable, setCanvasIsDraggable, nodes, state, setState, setUpload} = useContext(CanvasContext)
+  const { stageRef, canvasIsDraggable, setCanvasIsDraggable, nodes, state, setState, setUpload, setUploadImage } = useContext(CanvasContext)
 
   const toggleCanvasIsDraggable = () =>{
     setCanvasIsDraggable(!canvasIsDraggable)
@@ -200,7 +200,10 @@ const CanvasNavbar = ({ modulesAllowed }) => {
       {/* Create a way to upload images later (if there's time) */}
       {
         modules.has("photo") ? 
-        <button>
+        <button
+          onClick={() => setUploadImage(prevState => !prevState)}
+          data-title="Upload Floor Plan"
+        >
           <AddPhotoAlternateIcon
             sx={{
               fontSize: "1.3em"
