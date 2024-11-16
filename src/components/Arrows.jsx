@@ -100,7 +100,19 @@ const Arrows = () => {
           let rotation = 0
           const path = paths.get(node).get(closestNode)
           if(!nodes.has(node) || !nodes.has(closestNode))return null
-          if(path === "xy"){
+          if(Math.abs(nodes.get(node).ui.x - nodes.get(closestNode).ui.x) < 10){
+            if(nodes.get(node).ui.y > nodes.get(closestNode).ui.y){
+              rotation = 180
+            }else{
+              rotation = 0
+            }
+          }else if(Math.abs(nodes.get(node).ui.y - nodes.get(closestNode).ui.y) < 10){
+            if(nodes.get(node).ui.x > nodes.get(closestNode).ui.x){
+              rotation = 90
+            }else{
+              rotation = 270
+            }
+          }else if(path === "xy"){
             if(nodes.get(node).ui.x > nodes.get(closestNode).ui.x){
               rotation = 90
             }else{
