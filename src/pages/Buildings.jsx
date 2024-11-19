@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import Building from '../components/Building'
 import { Link } from 'react-router-dom'
+import Navbar from '../components/navbar'; // Import the navbar
 
 const Buildings = () => {
   const [buildings, setBuildings] = useState([])
@@ -48,6 +49,8 @@ const Buildings = () => {
   return (
     // Add option to delete floors and buildings
     <Container>
+      <Navbar />
+      <MainContent>
       <h3>This definitely needs to be redesigned</h3>
       <p>I'm just dumping things here because I need the links</p>
       <ul>
@@ -56,11 +59,13 @@ const Buildings = () => {
         }
       </ul>
       <Link to="/building/new" className='new-building'>Create a new Building</Link>
+      </MainContent>
     </Container>
   )
 }
 
 const Container = styled.div`
+  display: flex;
   min-height: 100vh;
   > ul{
     list-style: none;
@@ -92,5 +97,8 @@ const Container = styled.div`
     width: max-content;
   }
 `
-
+const MainContent = styled.div`
+  flex-grow: 1;
+  padding: 30px;
+`;
 export default Buildings

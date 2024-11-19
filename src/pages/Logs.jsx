@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import Pagination from '@mui/material/Pagination';
 import Log from '../components/Log'
 import FilterInput from '../components/FilterInput'
+import Navbar from '../components/navbar'; // Import the navbar
 const pageCount = 20
 
 const Logs = () => {
@@ -99,6 +100,8 @@ const Logs = () => {
 
   return (
     <Container>
+      <Navbar />
+      <MainContent>
       {/* <QueryInput /> */}
       <div className='log-filter'>
         <h3>Filter</h3>
@@ -137,11 +140,13 @@ const Logs = () => {
         }
       </div>
       <Pagination count={Math.ceil(totalCount / pageCount) } page={page} shape="rounded" onChange={handlePageChange} />
+      </MainContent>
     </Container>
   )
 }
 
 const Container = styled.div`
+  display: flex;
   padding: 1em;
   .log-container {
     p {
@@ -175,5 +180,10 @@ const Container = styled.div`
     }
   }
 `
+
+const MainContent = styled.div`
+  flex-grow: 1;
+  padding: 30px;
+`;
 
 export default Logs
