@@ -19,7 +19,7 @@ import { Link } from 'react-router-dom';
 
 const CanvasNavbar = ({ modulesAllowed }) => {
   const [modules, setModules] = useState(new Set())
-  const { stageRef, canvasIsDraggable, setCanvasIsDraggable, nodes, state, setState, setUpload, setUploadImage } = useContext(CanvasContext)
+  const { stageRef, canvasIsDraggable, setCanvasIsDraggable, nodes, state, setState, setUpload, setUploadImage, imageMeta, image, floorId } = useContext(CanvasContext)
 
   const toggleCanvasIsDraggable = () =>{
     setCanvasIsDraggable(!canvasIsDraggable)
@@ -30,10 +30,17 @@ const CanvasNavbar = ({ modulesAllowed }) => {
     let left, bottom, top, right
     const width = stageRef.current.getWidth()
     const height = stageRef.current.getHeight()
-    left = Number.MAX_SAFE_INTEGER
-    bottom = Number.MAX_SAFE_INTEGER
-    right = Number.MIN_SAFE_INTEGER
-    top = Number.MIN_SAFE_INTEGER
+    if(image?.position?.length === 2 && image?.scale?.length === 2){
+      left = image.position[0]
+      bottom = image.position[1]
+      right = image.position[0] + imageMeta.width * image.scale[0]
+      top = image.position[1] + imageMeta.height * image.scale[1]
+    }else{
+      left = Number.MAX_SAFE_INTEGER
+      bottom = Number.MAX_SAFE_INTEGER
+      right = Number.MIN_SAFE_INTEGER
+      top = Number.MIN_SAFE_INTEGER
+    }
 
     for(const [_, node] of nodes){
       left = Math.min(left, node.ui.x)
@@ -247,7 +254,7 @@ const CanvasNavbar = ({ modulesAllowed }) => {
 
       {
         modules.has("edit") ? 
-        <Link to="edit" data-title="Edit Floor Plan">
+        <Link to={`/floor/${floorId}/edit`} data-title="Edit Floor Plan">
           <OpenInNewIcon
             sx={{
               fontSize: "1.3em"
@@ -262,8 +269,8 @@ const CanvasNavbar = ({ modulesAllowed }) => {
 
 const Container = styled.div`
   position: absolute;
-  left: 0;
-  transform: translateX(calc(50vw - 50%));
+  /* left: 0;
+  transform: translateX(calc(50vw - 50%)); */
   top: 10px;
   display: flex;
   flex-direction: row;
