@@ -37,9 +37,7 @@ const Background = () => {
     for(let i = 0; i < horizontalLineCount; i++){
       while(outlinedHorizontalLine < horizontalY)outlinedHorizontalLine += lineDistance * 5
       horizontalLines.push({
-        stroke: outlinedHorizontalLine === horizontalY ? 
-        (scale < 0.5 ? "black" : "#b5b5b5") : 
-        (scale < 0.5 ? "#b5b5b5" : "#e6e6e6"),
+        stroke: outlinedHorizontalLine === horizontalY ? "#b5b5b5" : "#e6e6e6",
         points: [horizontalX, horizontalY, horizontalX + (width / scale), horizontalY]
       })
       horizontalY += lineDistance
@@ -60,9 +58,7 @@ const Background = () => {
     for(let i = 0; i < verticalLineCount; i++){
       while(outlinedVerticalLine < verticalX)outlinedVerticalLine += lineDistance * 5
       verticalLines.push({
-        stroke: outlinedVerticalLine === verticalX ? 
-        (scale < 0.5 ? "black" : "#b5b5b5") : 
-        (scale < 0.5 ? "#b5b5b5" : "#e6e6e6"),
+        stroke: outlinedVerticalLine === verticalX ? "#b5b5b5" : "#e6e6e6",
         points: [verticalX, verticalY, verticalX, (height / scale) + verticalY]
       })
       verticalX += lineDistance
