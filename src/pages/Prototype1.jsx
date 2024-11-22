@@ -1,7 +1,6 @@
 import styled from 'styled-components'
 import { useState } from 'react'
 import Canvas from '../components/prototype1/Canvas'
-import Navbar from '../components/navbar'; // Import the navbar
 const Prototype1 = () => {
   const [state, setState] = useState("default")
   // Create, Connect, Disconnect, Delete, Default
@@ -25,9 +24,5 @@ const Prototype1 = () => {
 
 const Container = styled.div`
   display: flex;
-`;
-const MainContent = styled.div`
-  flex-grow: 1;
-  padding: 30px;
 `;
 export default Prototype1
