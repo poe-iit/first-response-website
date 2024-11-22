@@ -141,6 +141,7 @@ const Buildings = () => {
 }
 
 const Container = styled.div`
+  display: flex;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -179,5 +180,4 @@ const Container = styled.div`
     width: 80%;
   }
 `
-
 export default Buildings

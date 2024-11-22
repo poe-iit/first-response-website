@@ -20,7 +20,6 @@ const Login = () => {
   const navigate = useNavigate()
   const handleSubmit = (e) => {
     e.preventDefault()
-    const token = localStorage.getItem('token')
     const query = `
       query {
         loginUser(email: "${email}", password: "${password}") {
@@ -40,8 +39,7 @@ const Login = () => {
     fetch(`${import.meta.env.VITE_SERVER_URI}/graphql`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        'Content-Type': 'application/json'
       },
       credentials: 'include',
       body: JSON.stringify({ query })

@@ -1,12 +1,13 @@
 import styled from 'styled-components'
 import { useState } from 'react'
 import Canvas from '../components/prototype1/Canvas'
-
 const Prototype1 = () => {
   const [state, setState] = useState("default")
   // Create, Connect, Disconnect, Delete, Default
   return (
     <Container>
+      <Navbar />
+      <MainContent>
       <Canvas state={state}/>
       <section className='buttons'>
         <button onClick={() => setState("default")}>Default</button>
@@ -16,10 +17,12 @@ const Prototype1 = () => {
         <button onClick={() => setState("delete")}>Delete</button>
         <button onClick={() => setState("upload")}>Upload Node</button>
       </section>
+      </MainContent>
     </Container>
   )
 }
 
-const Container = styled.div``
-
+const Container = styled.div`
+  display: flex;
+`;
 export default Prototype1

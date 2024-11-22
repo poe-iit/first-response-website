@@ -11,9 +11,9 @@ import Floor from './pages/Floor'
 import NewFloor from './pages/NewFloor'
 import EditFloor from './pages/EditFloor'
 import Building from './pages/Building'
+import Navbar from './components/navbar'
 
 function App() {
-
   const [user, setUser] = useState(null)
   const [isAuth, setIsAuth] = useState(false)
   const [description, setDescription] = useState("")
@@ -129,27 +129,41 @@ function App() {
     }
   }, [description])
 
+  useEffect(() => {
+    console.log(user)
+  }, [user])
+
   return (
     <AuthContext.Provider value={{ user, setUser, isAuth, setIsAuth }}>
       <Container data-stop={true}>
-        <Routes>
-          <Route path="/" exact element={<Home />} />
-          <Route path="/login" exact element={<Login />} />
-          <Route path="/prototype1" exact element={ <Prototype1 />} />
-          <Route path="/logs" exact element={ <Logs />} />
-          <Route path="/building/:id" exact element={ <Building />} />
-          <Route path="/buildings" exact element={ <Buildings />} />
-          <Route path="/building/:buildingId/new" exact element={ <NewFloor />} />
-          <Route path="/floor/:id" exact element={ <Floor />} />
-          <Route path="/floor/:id/edit" exact element={ <EditFloor />} />
-        </Routes>
+        <Navbar />
+        <div id="main-container">
+          <Routes>
+            <Route path="/" exact element={<Home />} />
+            <Route path="/login" exact element={<Login />} />
+            <Route path="/prototype1" exact element={ <Prototype1 />} />
+            <Route path="/logs" exact element={ <Logs />} />
+            <Route path="/building/:id" exact element={ <Building />} />
+            <Route path="/buildings" exact element={ <Buildings />} />
+            <Route path="/building/:buildingId/new" exact element={ <NewFloor />} />
+            <Route path="/floor/:id" exact element={ <Floor />} />
+            <Route path="/floor/:id/edit" exact element={ <EditFloor />} />
+          </Routes>
+        </div>
         <div ref={descriptionRef} id="meta-description" className = {description.length ? "active" : ""}>{description}</div>
       </Container>
     </AuthContext.Provider>
   )
 }
 
-const Container = styled.div` 
+const Container = styled.div`
+  display: flex;
+  flex-direction: row;
+  min-height: 100vh;
+  position: relative;
+  #main-container{
+    flex: 1;
+  }
   #meta-description{
     position: fixed;
     font-size: 0.9em;
