@@ -11,7 +11,7 @@ import Floor from './pages/Floor'
 import NewFloor from './pages/NewFloor'
 import EditFloor from './pages/EditFloor'
 import Building from './pages/Building'
-import Navbar from './components/navbar'
+import Navbar from './components/Navbar'
 
 function App() {
   const [user, setUser] = useState(null)
