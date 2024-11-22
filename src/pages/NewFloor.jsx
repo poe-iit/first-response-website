@@ -19,11 +19,12 @@ const NewFloor = () => {
   const [updateNode, setUpdateNode] = useState()
   const [nodeStates, setNodeStates] = useState(new Map())
   const [uploadImage, setUploadImage] = useState(false)
+  const [imageMeta, setImageMeta] = useState({width: 0, height: 0})
   const [image, setImage] = useState(null)
 
   return (
     <Container>
-      <CanvasContext.Provider value={{stageRef, floorId, setFloorId, state, setState, nodes, setNodes, connections, setConnections, prevSelectedNode, setPrevSelectedNode, canvasIsDraggable, setCanvasIsDraggable, upload, setUpload, updateNode, setUpdateNode, nodeStates, setNodeStates, uploadImage, setUploadImage, image, setImage }}>
+      <CanvasContext.Provider value={{stageRef, floorId, setFloorId, state, setState, nodes, setNodes, connections, setConnections, prevSelectedNode, setPrevSelectedNode, canvasIsDraggable, setCanvasIsDraggable, upload, setUpload, updateNode, setUpdateNode, nodeStates, setNodeStates, uploadImage, setUploadImage, image, setImage, imageMeta, setImageMeta }}>
         <Canvas edit={true}/>
         <CanvasNavbar modulesAllowed={[
           "lock",
@@ -49,6 +50,10 @@ const NewFloor = () => {
 
 const Container = styled.div`
   position: relative;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `
 
 export default NewFloor

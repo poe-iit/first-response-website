@@ -71,8 +71,9 @@ const UpdateNodeData = () => {
     <Container onClick={() => setUpdateNode()}>
       <div onClick={e => e.stopPropagation()}>
         <h1>Update Node Data</h1>
+        <p className="node-id">Node Id: {nodeData.id}</p>
         <TextField id="outlined-basic" label="Node Name" variant="outlined" defaultValue={node?.name || ""} onInput={updateNodeName} placeholder={nodeData?.name || ""}/>
-        <p onClick={updateExitStatus}>
+        <p className="node-exit" onClick={updateExitStatus}>
           Make Node Exit <Checkbox onClick={updateExitStatus} checked={node.isExit} />
         </p>
         <div className='button-container'>
@@ -106,10 +107,13 @@ const Container = styled.div`
     width: 30%;
     min-width: 30em;
     h1{
-      margin-bottom: 1em;
+      margin-bottom: 0%.5;
       text-align: center;
     }
-    p{
+    .node-id{
+      text-align: center;
+    }
+    .node-exit{
       display: inline-flex;
       flex-direction: row;
       justify-content: space-between;

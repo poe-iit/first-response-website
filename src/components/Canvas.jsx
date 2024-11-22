@@ -1,5 +1,5 @@
 import { Stage, Layer } from "react-konva"
-import { useContext, useEffect, useRef, useState } from "react"
+import { useContext, useEffect } from "react"
 import Node from "./Node";
 import InvisibleNode from "./InvisibleNode";
 import ConnectedLines from "./ConnectedLines";
@@ -49,8 +49,12 @@ const Canvas = ({ edit }) => {
     }
   }
   const handleResize = (e) => {
-    stageRef.current.setWidth(window.innerWidth)
-    stageRef.current.setHeight(window.innerHeight)
+    if(stageRef.current){
+      const stageRefParent = stageRef.current.content.parentElement.parentElement
+      stageRef.current.setWidth(stageRefParent.offsetWidth)
+      stageRef.current.setHeight(stageRefParent.offsetHeight)
+      stageRef.current?.fire("positionchanged")
+    }
   }
 
   const handleWheel = (e) => {
@@ -80,13 +84,20 @@ const Canvas = ({ edit }) => {
 
   useEffect(() => {
     window.addEventListener("resize", handleResize)
+    if(stageRef.current){
+      const stageRefParent = stageRef.current.content.parentElement.parentElement
+      stageRef.current.setWidth(stageRefParent.offsetWidth)
+      stageRef.current.setHeight(stageRefParent.offsetHeight)
+      stageRef.current?.fire("positionchanged")
+    }
+    console.log(stageRef?.current.content.parentElement)
     return () => {
       window.removeEventListener("resize", handleResize)
     }
   }, [])
 
   return (
-    <Stage width={window.innerWidth} height={window.innerHeight} onClick={handleClick} onTap={handleClick} ref={stageRef} draggable={canvasIsDraggable} onWheel={handleWheel}
+    <Stage width={0} height={0} onClick={handleClick} onTap={handleClick} ref={stageRef} draggable={canvasIsDraggable} onWheel={handleWheel}
     >
       <Layer>
         <Background />

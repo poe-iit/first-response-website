@@ -62,6 +62,18 @@ const Container = styled.li`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+  padding: 0.5em;
+  border-radius: 0.3em;
+  cursor: pointer;
+  &:hover{
+    background-color: #00000010;
+  }
+  a{
+    text-decoration: none;
+    color: #3a3aff;
+    font-size: 1em;
+    flex: 1;
+  }
   svg{
     margin-left: 1em;
     fill: #d45d5d;
