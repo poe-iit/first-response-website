@@ -5,12 +5,16 @@ import { CanvasContext } from '../hooks/CanvasContext'
 const Image = () => {
   const imageRef = useRef()
   const canvasImageRef = useRef()
-  const { image, state, stageRef, setImage, setUploadImage } = useContext(CanvasContext)
+  const { image, state, stageRef, setImage, setUploadImage, setImageMeta } = useContext(CanvasContext)
 
   const positionDiff = useRef([0, 0])
 
   if(!imageRef.current)imageRef.current = document.createElement('img')
   imageRef.current.onload = () => {
+    setImageMeta({
+      width: imageRef.current.width,
+      height: imageRef.current.height
+    })
     canvasImageRef.current.image(imageRef.current)
   }
   useEffect(() => {
