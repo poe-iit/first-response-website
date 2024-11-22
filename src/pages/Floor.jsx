@@ -10,8 +10,11 @@ const generateRandomId = () => {
   return Math.random().toString(36).substring(2, 9);
 }
 
-const Floor = () => {
-  const { id } = useParams()
+const Floor = ({ id }) => {
+  if(!id){
+    const params = useParams()
+    id = params.id
+  }
   const stageRef = useRef()
   const [state, setState] = useState("")
   const [nodes, setNodes] = useState(new Map())
@@ -22,6 +25,7 @@ const Floor = () => {
   const [upload, setUpload] = useState(false)
   const [nodeStates, setNodeStates] = useState(new Map())
   const [image, setImage] = useState(null)
+  const [imageMeta, setImageMeta] = useState({width: 0, height: 0})
   const wsRef = useRef(null)
 
   const connectWebSocket = () => {
@@ -184,7 +188,7 @@ const Floor = () => {
 
   return (
     <Container>
-      <CanvasContext.Provider value={{stageRef, floorId, setFloorId, state, setState, nodes, setNodes, connections, setConnections, prevSelectedNode, setPrevSelectedNode, canvasIsDraggable, setCanvasIsDraggable, upload, setUpload, nodeStates, setNodeStates, image, setImage  }}>
+      <CanvasContext.Provider value={{stageRef, floorId, setFloorId, state, setState, nodes, setNodes, connections, setConnections, prevSelectedNode, setPrevSelectedNode, canvasIsDraggable, setCanvasIsDraggable, upload, setUpload, nodeStates, setNodeStates, image, setImage, imageMeta, setImageMeta }}>
         <Canvas />
         <CanvasNavbar modulesAllowed={[
           "lock",
@@ -208,6 +212,10 @@ const Floor = () => {
 
 const Container = styled.div`
   position: relative;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `
 
 export default Floor

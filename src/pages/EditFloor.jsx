@@ -41,6 +41,7 @@ const EditFloor = () => {
   const [nodeStates, setNodeStates] = useState(new Map())
   const [uploadImage, setUploadImage] = useState(false)
   const [image, setImage] = useState(null)
+  const [imageMeta, setImageMeta] = useState({width: 0, height: 0})
   const wsRef = useRef(null)
 
   const connectWebSocket = () => {
@@ -192,7 +193,7 @@ const EditFloor = () => {
 
   return (
     <Container>
-      <CanvasContext.Provider value={{stageRef, floorId, setFloorId, state, setState, nodes, setNodes, connections, setConnections, prevSelectedNode, setPrevSelectedNode, canvasIsDraggable, setCanvasIsDraggable, upload, setUpload, updateNode, setUpdateNode, nodeStates, setNodeStates, uploadImage, setUploadImage, image, setImage }}>
+      <CanvasContext.Provider value={{stageRef, floorId, setFloorId, state, setState, nodes, setNodes, connections, setConnections, prevSelectedNode, setPrevSelectedNode, canvasIsDraggable, setCanvasIsDraggable, upload, setUpload, updateNode, setUpdateNode, nodeStates, setNodeStates, uploadImage, setUploadImage, image, setImage, imageMeta, setImageMeta }}>
         <Canvas edit={true} />
         <CanvasNavbar modulesAllowed={[
           "lock",
@@ -218,6 +219,10 @@ const EditFloor = () => {
 
 const Container = styled.div`
   position: relative;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `
 
 export default EditFloor
