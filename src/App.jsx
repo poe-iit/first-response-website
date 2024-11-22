@@ -10,6 +10,7 @@ import Buildings from './pages/Buildings'
 import Floor from './pages/Floor'
 import NewFloor from './pages/NewFloor'
 import EditFloor from './pages/EditFloor'
+import Building from './pages/Building'
 
 function App() {
 
@@ -23,7 +24,7 @@ function App() {
   const removeData = () => {
     localStorage.removeItem("token")
     localStorage.removeItem("expiresIn")
-    setUser(null)
+    setUser(false)
   }
 
   useEffect(() => {
@@ -136,6 +137,7 @@ function App() {
           <Route path="/login" exact element={<Login />} />
           <Route path="/prototype1" exact element={ <Prototype1 />} />
           <Route path="/logs" exact element={ <Logs />} />
+          <Route path="/building/:id" exact element={ <Building />} />
           <Route path="/buildings" exact element={ <Buildings />} />
           <Route path="/building/:buildingId/new" exact element={ <NewFloor />} />
           <Route path="/floor/:id" exact element={ <Floor />} />
