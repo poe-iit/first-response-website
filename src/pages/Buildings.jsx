@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import Floor from '../components/Floor'
 import { Link } from 'react-router-dom'
-import Navbar from '../components/navbar'; // Import the navbar
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -113,33 +112,30 @@ const Buildings = () => {
   return (
     // Add option to delete floors and buildings
     <Container>
-      <Navbar />
-      <MainContent>
-        <h2>System Overview</h2>
-        {
-          buildings.map((building, key) => (
-            <Accordion className="building" key={key}>
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                aria-controls="panel1a-content"
-                id="panel1a-header"
-              >
-                <Link to={`/building/${building?.id}`} className='building-name'>{building?.name}</Link>
-              </AccordionSummary>
-              <AccordionDetails>
-                <ul>
-                {
-                  building?.floors?.length ? building.floors.map((floor, key) => <Floor key={key} name={floor.name} id={floor.id} setBuildings={setBuildings} /> ): <></>
-                }
-                </ul>
-                <Link to={`/building/${building?.id}/new`} className='new-floor'>Create a new floor</Link>
-              </AccordionDetails>
-            </Accordion>
-          ))
-        }
-        <button className='new-building' onClick={() => setCreatingBuilding(true)}>Create a new building</button>
-        {creatingBuilding ? <CreateBuilding setCreatingBuilding={setCreatingBuilding} /> : <></>}
-      </MainContent>
+      <h2>System Overview</h2>
+      {
+        buildings.map((building, key) => (
+          <Accordion className="building" key={key}>
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls="panel1a-content"
+              id="panel1a-header"
+            >
+              <Link to={`/building/${building?.id}`} className='building-name'>{building?.name}</Link>
+            </AccordionSummary>
+            <AccordionDetails>
+              <ul>
+              {
+                building?.floors?.length ? building.floors.map((floor, key) => <Floor key={key} name={floor.name} id={floor.id} setBuildings={setBuildings} /> ): <></>
+              }
+              </ul>
+              <Link to={`/building/${building?.id}/new`} className='new-floor'>Create a new floor</Link>
+            </AccordionDetails>
+          </Accordion>
+        ))
+      }
+      <button className='new-building' onClick={() => setCreatingBuilding(true)}>Create a new building</button>
+      {creatingBuilding ? <CreateBuilding setCreatingBuilding={setCreatingBuilding} /> : <></>}
     </Container>
   )
 }
@@ -184,8 +180,4 @@ const Container = styled.div`
     width: 80%;
   }
 `
-const MainContent = styled.div`
-  flex-grow: 1;
-  padding: 30px;
-`;
 export default Buildings
