@@ -24,4 +24,9 @@ export const CanvasContext = createContext({
   setUploadImage: () => {},
   image: {},
   setImage: () => {},
+  imageMeta: {
+    width: 0,
+    height: 0
+  },
+  setImageMeta: () => {},
 })
